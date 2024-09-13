@@ -43,7 +43,7 @@ export default function TabOrder() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 14,u
+    padding: 14,
     backgroundColor: '#fff',
   },
   title: {
