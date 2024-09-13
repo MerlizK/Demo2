@@ -4,6 +4,7 @@ import { ScrollView, TextInput, StyleSheet, Text, View, TouchableOpacity } from 
 
 import SHeader from './components/SHeader';
 import Order from './components/Order';
+import Colors from '../Constants';
 
 
 export default function TabOrder() {
@@ -82,7 +83,7 @@ const styles = StyleSheet.create({
     padding:5,
     alignItems:'center',
     alignSelf: 'center',
-    backgroundColor: '#2C2C2C',
+    backgroundColor: Colors.PRIMARY_DARK,
     borderRadius: 10,
     marginTop: 100,
   }

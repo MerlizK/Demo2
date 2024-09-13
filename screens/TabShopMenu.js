@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import SHeader from './components/SHeader';
 import Menu from './components/Menu';
 
+import Colors from '../Constants';
 
 export default function TabMenu() {
   const [shopAva,setShopAva] = useState(true);
@@ -80,7 +81,7 @@ const styles = StyleSheet.create({
     padding:5,
     alignItems:'center',
     alignSelf: 'center',
-    backgroundColor: '#2C2C2C',
+    backgroundColor: Colors.PRIMARY_DARK,
     borderRadius: 10,
     marginTop: 100,
   }

@@ -4,6 +4,7 @@ import { ScrollView, TextInput, StyleSheet, Text, View, TouchableOpacity } from 
 import { useNavigation } from '@react-navigation/native';
 
 import SHeader from './components/SHeader';
+import Colors from '../Constants';
 
 export default function TabInfo() {
   const navigation = useNavigation()
@@ -81,14 +82,14 @@ const styles = StyleSheet.create({
   },
   button: {
     alignItems: 'center',
-    backgroundColor: '#2C2C2C',
+    backgroundColor: Colors.PRIMARY_DARK,
     marginVertical: 50,
     padding: 10,
     width: 130,
     borderRadius: 10
   },
   addButton: {
-    backgroundColor: '#2C2C2C',
+    backgroundColor: Colors.PRIMARY_DARK,
     padding: 10,
     paddingHorizontal: 20,
     borderRadius: 10,
@@ -116,7 +117,7 @@ const styles = StyleSheet.create({
   },
   registerButton: {
     maxWidth: 163, // Limit button width
-    backgroundColor: '#2C2C2C',
+    backgroundColor: Colors.PRIMARY_DARK,
     alignSelf: 'flex-end',
     padding: 15,
     borderRadius: 5,
@@ -125,7 +126,7 @@ const styles = StyleSheet.create({
   }, 
   historyButton: {
     maxWidth: 163, // Limit button width
-    backgroundColor: '#2C2C2C',
+    backgroundColor: Colors.PRIMARY_DARK,
     alignSelf: 'flex-start',
     padding: 15,
     borderRadius: 5,

@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { Calendar } from 'react-native-calendars';
+import Colors from '../Constants';
 
 
 const Daybutton = ({day,onPress}) => {
@@ -187,7 +188,7 @@ const styles = StyleSheet.create({
   },
   button: {
     alignItems: 'center',
-    backgroundColor: '#2C2C2C',
+    backgroundColor: Colors.PRIMARY_DARK,
     padding: 10,
     paddingHorizontal: 70,
     borderRadius: 5
@@ -213,7 +214,7 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     borderRadius: 8,
-    backgroundColor: '#2c2c2c',
+    backgroundColor: Colors.PRIMARY_DARK,
   },
   tabText: {
     fontSize: 16,
