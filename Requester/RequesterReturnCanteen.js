@@ -10,6 +10,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from 'react-native';
+import Colors from '../Constants';
 
 const RequesterReturnCanteen = () => (
   <View style={styles.container}>
@@ -65,7 +66,7 @@ const styles = StyleSheet.create({
   },
   button: {
     alignItems: 'center',
-    backgroundColor: '#2C2C2C',
+    backgroundColor: Colors.PRIMARY_DARK,
     paddingVertical: 10,
     paddingHorizontal: 80,
     borderRadius: 10,

@@ -10,6 +10,7 @@ import {
     Dimensions,
     Modal,
   } from 'react-native';
+import Colors from '../../Constants';
 
 import { useNavigation } from '@react-navigation/native';
 import { Checkbox } from 'react-native-paper';
@@ -192,14 +193,14 @@ const styles = StyleSheet.create({
   },
   button: {
     alignItems: 'center',
-    backgroundColor: '#2C2C2C',
+    backgroundColor: Colors.PRIMARY_DARK,
     marginVertical: 50,
     padding: 10,
     width: 130,
     borderRadius: 10
   },
   addButton: {
-    backgroundColor: '#2C2C2C',
+    backgroundColor: Colors.PRIMARY_DARK,
     padding: 10,
     paddingHorizontal: 20,
     borderRadius: 10,
