@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { ScrollView, TextInput, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Colors from '../Constants';
+import Colors from '../../Constants';
 
 export default function CreateMenu() {
   const navigation = useNavigation();

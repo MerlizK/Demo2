@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { Calendar } from 'react-native-calendars';
-import Colors from '../Constants';
+import Colors from '../../Constants';
 
 
 const Daybutton = ({day,onPress}) => {

@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import Colors from '../Constants';
+import Colors from '../../Constants';
 
 export default function EditMenu() {
   const navigation = useNavigation();

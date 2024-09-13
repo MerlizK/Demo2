@@ -1,24 +1,38 @@
 import React, {useState} from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { ScrollView, TextInput, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { 
+    ScrollView, 
+    TextInput, 
+    StyleSheet, 
+    Text, 
+    View, 
+    TouchableOpacity,
+    Dimensions,
+    Modal,
+  } from 'react-native';
+import Colors from '../../Constants';
+
 import { useNavigation } from '@react-navigation/native';
 import { Checkbox } from 'react-native-paper';
-import Colors from '../Constants';
 
-export default function AddOption() {
+export default function EditOption() {
   const navigation = useNavigation();
   const [isRequired, setIsRequired] = React.useState(true);
   const [isSingleChoice, setIsSingleChoice] = useState(true);
 
+  const gotoEditMenu = () => navigation.navigate('EditMenu');
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
   return (
     // <ScrollView>
     <View style={styles.container}>
-    <TouchableOpacity onPress={() => navigation.goBack()}>
-      <Text style={styles.title}>{`< ชื่อเมนู`}</Text>
-    </TouchableOpacity>
+      <TouchableOpacity onPress={() => navigation.goBack()}>
+        <Text style={styles.title}>{`< ชื่อเมนู`}</Text>
+      </TouchableOpacity>
 
       <View style={{padding:10,justifyContent:'center',alignSelf:'center',backgroundColor: '#EEEEEE',width: 360, height: 40}}>
-        <TextInput style={{fontSize: 16}} placeholder='ชื่อตัวเลือก'/>
+        <TextInput style={{fontSize: 16}} placeholder='เพิ่มเนื้อ'/>
       </View>
 
       <View style={{marginTop:20, marginLeft:10}}>
@@ -39,7 +53,7 @@ export default function AddOption() {
             จำเป็น
           </Text>
         </View>
-
+        
         <View style={{flexDirection: 'row'}}>
           <Checkbox
               status={!isRequired ? 'checked' : 'unchecked'}
@@ -65,7 +79,7 @@ export default function AddOption() {
           </Text>
         </View>
         <View style={{justifyContent: 'space-between',marginTop: 10,flexDirection: 'row'}}>
-        <View style={{flexDirection: 'row'}}>
+          <View style={{flexDirection: 'row'}}>
             <Checkbox
                 status={!isSingleChoice ? 'checked' : 'unchecked'}
                 onPress={() => {setIsSingleChoice(false);}}
@@ -92,11 +106,13 @@ export default function AddOption() {
           เพิ่มตัวเลือกย่อย
         </Text>
         <View style={{marginTop: 10,flexDirection: 'row',justifyContent: 'space-between'}}>
-          {/* <Text style={{fontSize: 16,}}>เนื้อสด</Text>
-          <Text style={{fontSize: 16,}}>+10.00 บาท</Text>
-          <TouchableOpacity style={styles.binButton}>
-            <Text style = {{color: 'white',fontSize: 40,lineHeight: 32}}>-</Text>
-          </TouchableOpacity> */}
+          <Text style={{fontSize: 16,}}>เนื้อสด</Text>
+          <View style={{flexDirection: 'row'}}>
+            <Text style={{fontSize: 16,}}>+10.00 บาท</Text>
+            <TouchableOpacity style={styles.binButton}>
+              <Text style = {{color: 'white',fontSize: 40,lineHeight: 32}}>-</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={{justifyContent: 'space-between',marginTop: 10,flexDirection: 'row'}}>
@@ -118,12 +134,39 @@ export default function AddOption() {
 
 
         <View style={{flexDirection: 'row',justifyContent: 'space-evenly'}}>
+          <TouchableOpacity onPress={() => setIsModalVisible(true)} style={styles.button}>
+            <Text style={{fontSize: 16,color:'white'}}>ลบ Option</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.button}>
-            <Text style={{fontSize: 16,color:'white'}}>เพิ่ม Option</Text>
+            <Text style={{fontSize: 16,color:'white'}}>บันทึก Option</Text>
           </TouchableOpacity>
         </View>
 
       </View>
+
+      <Modal visible={isModalVisible} transparent={true}>
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>ยืนยันการลบOption?</Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setIsModalVisible(false)}>
+                <Text style={styles.buttonText}>ยกเลิก</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.confirmButton}
+                onPress={() => {
+                  gotoEditMenu();
+                  setIsModalVisible(false);
+                }}>
+                <Text style={styles.buttonText}>ยืนยัน</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       <StatusBar style="auto" />
     </View>
     // </ScrollView>
@@ -174,5 +217,44 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 5,
     marginHorizontal: 10,
-  }
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Darker background
+  },
+  modalContent: {
+    width: Dimensions.get('window').width * 0.8, // 80% of screen width
+    height: Dimensions.get('window').width * 0.4,
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 8,
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 16,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+  },
+  cancelButton: {
+    backgroundColor: 'red',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginRight: 8,
+  },
+  confirmButton: {
+    backgroundColor: 'green',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+  },
 });
