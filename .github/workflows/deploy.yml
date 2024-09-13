@@ -1,0 +1,30 @@
+name: Run Expo on Test Branch Update
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  expo-start:
+    runs-on: [KU]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Build Docker Container
+      run: |
+        docker build . -t shop-app
+
+    - name: Stop Running Container (if exists)
+      run: |
+        docker stop shop-app || true
+
+    - name: Remove Previous Container (if exists)
+      run: |
+        docker rm shop-app || true
+
+    - name: Run Docker Container
+      run: |
+        docker run -d --name shop-app -p 19003:8081 shop-app
