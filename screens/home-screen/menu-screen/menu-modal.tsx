@@ -174,9 +174,10 @@ const MenuModal: React.FC<MenuModalProps> = ({
             placeholder="ชื่อเมนู"
             placeholderTextColor="#000"
             value={menu?.name || ""}
-            onChangeText={(text) =>
-              setMenu((prev) => ({ ...prev, name: text }))
-            }
+            onChangeText={(text) => {
+              setMenu((prev) => ({ ...prev, name: text }));
+              console.log(menu);
+            }}
           />
           <ScrollView style={styles.container}>
             <TouchableOpacity

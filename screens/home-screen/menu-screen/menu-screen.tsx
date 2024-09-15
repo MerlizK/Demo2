@@ -72,6 +72,52 @@ const ShopMenuComponent = () => {
     }
   };
 
+  const createMenu = async (payload: {
+    name: string;
+    picture: string;
+    price: number;
+    description: string;
+  }) => {
+    try {
+      const response = await axios.post(
+        "https://ku-man.runnakjeen.com/shop/create-menu",
+        payload,
+        HeadersToken
+      );
+    } catch (error) {
+      console.error("Error fetching menu:", error);
+    }
+  };
+  const editMenu = async (payload: {
+    menuId: number;
+    name: string;
+    picture: string;
+    price: number;
+    description: string;
+    status: boolean;
+  }) => {
+    try {
+      const response = await axios.post(
+        "https://ku-man.runnakjeen.com/shop/edit-menu",
+        payload,
+        HeadersToken
+      );
+    } catch (error) {
+      console.error("Error fetching menu:", error);
+    }
+  };
+  const deleteMenu = async (menuId: number) => {
+    try {
+      const response = await axios.post(
+        "https://ku-man.runnakjeen.com/shop/delete-menu",
+        menuId,
+        HeadersToken
+      );
+    } catch (error) {
+      console.error("Error fetching menu:", error);
+    }
+  };
+
   useEffect(() => {
     fetchMenuData();
   }, []);
@@ -91,6 +137,7 @@ const ShopMenuComponent = () => {
     setImage(null);
     setDescription("");
     setIsAddMenuVisible(true);
+    console.log(currentMenu);
   };
   const handleSaveMenu = () => {
     console.log("Save menu data", data);
@@ -104,7 +151,7 @@ const ShopMenuComponent = () => {
     setImage(menu.picture || null);
     setDescription(menu.description || "");
     setIsAddMenuVisible(true);
-    console.log(description);
+    console.log(currentMenu);
   };
 
   const handleSave = () => {
@@ -120,38 +167,31 @@ const ShopMenuComponent = () => {
 
   const confirmActionHandler = () => {
     if (confirmAction === "save") {
-      if (currentMenu) {
-        setMenus((prevMenus) =>
-          prevMenus.map((menu) =>
-            menu.menuId === currentMenu.menuId
-              ? {
-                  ...currentMenu,
-                  price,
-                  option: options,
-                  image,
-                  description,
-                }
-              : menu
-          )
-        );
+      if (currentMenu && currentMenu.menuId) {
+        const payload = {
+          menuId: currentMenu.menuId,
+          name: currentMenu.name,
+          picture: image,
+          price: price,
+          description: description,
+          status: currentMenu.status,
+        };
+        console.log("payload ", payload);
+        editMenu(payload);
       } else {
-        setMenus([
-          ...menus,
-          {
-            menuId: newId,
-            name: `เมนูที่ ${newId}`,
-            status: true,
-            price,
-            options: options || [],
-            image,
-          },
-        ]);
+        const payload = {
+          name: currentMenu?.name || "",
+          picture: image || "",
+          price: price || 0,
+          description: description || "",
+        };
+        console.log("payload ", payload);
+        createMenu(payload);
       }
     } else if (confirmAction === "delete") {
-      setMenus((prevMenus) =>
-        prevMenus.filter((menu) => menu.menuId !== (currentMenu?.menuId || ""))
-      );
+      deleteMenu(currentMenu.menuId);
     }
+    fetchMenuData();
     setIsAddMenuVisible(false);
     setIsConfirmModalVisible(false);
   };
