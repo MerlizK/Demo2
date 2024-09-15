@@ -9,7 +9,8 @@ import {
   Image,
   ScrollView,
 } from "react-native";
-import { launchImageLibrary } from "react-native-image-picker";
+
+import * as ImagePicker from "expo-image-picker";
 import CustomCheckbox from "../../../components/checkbox";
 
 import Entypo from "@expo/vector-icons/Entypo";
@@ -40,7 +41,7 @@ interface MenuModalProps {
   setPrice: React.Dispatch<React.SetStateAction<number>>;
   setOptions: React.Dispatch<React.SetStateAction<Option[]>>;
   setDescription: React.Dispatch<React.SetStateAction<string>>;
-  setImage: React.Dispatch<React.SetStateAction<string | null>>;
+  setPicture: React.Dispatch<React.SetStateAction<string | null>>;
   onSave: () => void;
   onDelete: () => void;
 }
@@ -57,34 +58,24 @@ const MenuModal: React.FC<MenuModalProps> = ({
   setPrice,
   setOptions,
   setDescription,
-  setImage,
+  setPicture,
   onSave,
   onDelete,
 }) => {
-  const [imageUri, setImageUri] = useState<string | null>(picture);
   const [isOption, setIsOption] = useState(false);
 
-  const handleImagePick = () => {
-    if (launchImageLibrary) {
-      launchImageLibrary(
-        {
-          mediaType: "photo",
-          quality: 1,
-        },
-        (response) => {
-          if (response.didCancel) {
-            console.log("User cancelled image picker");
-          } else if (response.errorCode) {
-            console.log("ImagePicker Error: ", response.errorCode);
-          } else {
-            const selectedImageUri = response.assets?.[0].uri || null;
-            setImageUri(selectedImageUri);
-            setImage(selectedImageUri);
-          }
-        }
-      );
+  const handleImagePick = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const selectedImageUri = result.assets[0].uri || null;
+      setPicture(selectedImageUri);
+      console.log(result);
     } else {
-      console.log("Image picker library not initialized properly.");
+      console.log("User cancelled image picker");
     }
   };
 
@@ -176,7 +167,6 @@ const MenuModal: React.FC<MenuModalProps> = ({
             value={menu?.name || ""}
             onChangeText={(text) => {
               setMenu((prev) => ({ ...prev, name: text }));
-              console.log(menu);
             }}
           />
           <ScrollView style={styles.container}>
@@ -184,8 +174,8 @@ const MenuModal: React.FC<MenuModalProps> = ({
               style={styles.imageUploadContainer}
               onPress={handleImagePick}
             >
-              {imageUri ? (
-                <Image source={{ uri: imageUri }} style={styles.imagePreview} />
+              {picture ? (
+                <Image source={{ uri: picture }} style={styles.imagePreview} />
               ) : (
                 <Text style={styles.description}>Select Image</Text>
               )}
