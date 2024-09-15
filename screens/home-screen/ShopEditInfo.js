@@ -16,57 +16,59 @@ import SHeader from "../../components/SHeader";
 export default function EditInfo() {
   const navigation = useNavigation();
   return (
-    <View style={styles.container}>
-      <TouchableOpacity onPress={() => navigation.goBack()}>
-        <SHeader text={`< แก้ไขข้อมูลร้าน`} />
-      </TouchableOpacity>
-      <View
-        style={{
-          justifyContent: "center",
-          alignItems: "center",
-          alignSelf: "center",
-          marginVertical: 20,
-          backgroundColor: "#EEEEEE",
-          width: 300,
-          height: 200,
-          borderRadius: 10,
-        }}
-      >
-        <Text>เพิ่มรูปภาพ</Text>
-      </View>
-      <View style={styles.inputRow}>
-        <Text style={styles.label}>Username:</Text>
-        <TextInput style={styles.input} placeholder="SampleUsername" />
-      </View>
-      <View style={styles.inputRow}>
-        <Text style={styles.label}>Password:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;"
-        />
-      </View>
-      <View style={styles.inputRow}>
-        <Text style={styles.label}>ชื่อร้าน:</Text>
-        <TextInput style={styles.input} placeholder="SampleShopName" />
-      </View>
-      <View style={styles.inputRow}>
-        <Text style={styles.label}>เบอร์โทรศัพท์:</Text>
-        <TextInput style={styles.input} placeholder="SamplePhoneNumber" />
-      </View>
-      <View style={styles.inputRow}>
-        <Text style={styles.label}>โรงอาหาร:</Text>
-        <TextInput style={styles.input} placeholder="SampleCanteen" />
-      </View>
-      <View style={styles.inputRow}>
-        <Text style={styles.label}>หมายเลขร้าน:</Text>
-        <TextInput style={styles.input} placeholder="SampleShopNumber" />
-      </View>
+    <ScrollView>
+      <View style={styles.container}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <SHeader text={`< แก้ไขข้อมูลร้าน`} />
+        </TouchableOpacity>
+        <View
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            alignSelf: "center",
+            marginVertical: 20,
+            backgroundColor: "#EEEEEE",
+            width: 300,
+            height: 200,
+            borderRadius: 10,
+          }}
+        >
+          <Text>เพิ่มรูปภาพ</Text>
+        </View>
+        <View style={styles.inputRow}>
+          <Text style={styles.label}>Username:</Text>
+          <TextInput style={styles.input} placeholder="SampleUsername" />
+        </View>
+        <View style={styles.inputRow}>
+          <Text style={styles.label}>Password:</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;"
+          />
+        </View>
+        <View style={styles.inputRow}>
+          <Text style={styles.label}>ชื่อร้าน:</Text>
+          <TextInput style={styles.input} placeholder="SampleShopName" />
+        </View>
+        <View style={styles.inputRow}>
+          <Text style={styles.label}>เบอร์โทรศัพท์:</Text>
+          <TextInput style={styles.input} placeholder="SamplePhoneNumber" />
+        </View>
+        <View style={styles.inputRow}>
+          <Text style={styles.label}>โรงอาหาร:</Text>
+          <TextInput style={styles.input} placeholder="SampleCanteen" />
+        </View>
+        <View style={styles.inputRow}>
+          <Text style={styles.label}>หมายเลขร้าน:</Text>
+          <TextInput style={styles.input} placeholder="SampleShopNumber" />
+        </View>
 
-      <TouchableOpacity style={styles.registerButton}>
-        <Text style={styles.registerButtonText}>ยืนยันการแก้ไขข้อมูล</Text>
-      </TouchableOpacity>
-      <StatusBar style="auto" />
-    </View>
+        <TouchableOpacity style={styles.registerButton}>
+          <Text style={styles.registerButtonText}>ยืนยันการแก้ไขข้อมูล</Text>
+        </TouchableOpacity>
+        <StatusBar style="auto" />
+      </View>
+    </ScrollView>
   );
 }
 

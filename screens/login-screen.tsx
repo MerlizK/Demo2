@@ -16,8 +16,8 @@ import LoadingScreen from '../components/loading';
 const LoginScreen = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [isModalVisible, setModalVisible] = useState(false); // State for forgot password modal
-  const [isLoading, setIsLoading] = useState(false); // State for loading screen
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); 
   const navigation = useNavigation();
 
   const handleLogin = () => {
@@ -25,7 +25,7 @@ const LoginScreen = () => {
       const mockUsername = '1111';
       const mockPassword = '1111';
 
-      const responseStatus = 1000; // 1000 for success, 400 for failed
+      const responseStatus = 1000;
       username === mockUsername && password === mockPassword ? 1000 : 400;
 
       if (responseStatus !== 1000) {
