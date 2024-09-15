@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Modal,
   Image,
+  RefreshControl,
 } from "react-native";
 import axios from "axios";
 import MenuModal from "./menu-modal";
@@ -55,6 +56,7 @@ const ShopMenuComponent = () => {
   const [options, setOptions] = useState<Option[]>([]);
   const [image, setImage] = useState<string | null>(null);
   const [description, setDescription] = useState<string>("");
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchMenuData = async () => {
     try {
@@ -70,6 +72,11 @@ const ShopMenuComponent = () => {
     } catch (error) {
       console.error("Error fetching menu:", error);
     }
+  };
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchMenuData();
+    setRefreshing(false);
   };
 
   const createMenu = async (payload: {
@@ -220,7 +227,12 @@ const ShopMenuComponent = () => {
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.menuList}>
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
+        style={styles.menuList}
+      >
         {menus &&
           menus.map((menu) => (
             <View key={menu.menuId} style={styles.menuItem}>
