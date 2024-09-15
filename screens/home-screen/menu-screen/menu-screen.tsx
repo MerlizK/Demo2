@@ -11,7 +11,7 @@ import {
 import axios from "axios";
 import MenuModal from "./menu-modal";
 import Entypo from "@expo/vector-icons/Entypo";
-import { HeadersToken, Token } from "../../../Constants";
+import { HeadersToken } from "../../../Constants";
 
 interface Option {
   name: string;
@@ -109,13 +109,16 @@ const ShopMenuComponent = () => {
   };
   const deleteMenu = async (menuId: number) => {
     try {
-      const response = await axios.post(
-        "https://ku-man.runnakjeen.com/shop/delete-menu",
-        menuId,
-        HeadersToken
+      const response = await axios.delete(
+        `https://ku-man.runnakjeen.com/shop/delete-menu`,
+        {
+          params: { menuId },
+          ...HeadersToken,
+        }
       );
+      console.log("Menu deleted successfully:", response.data);
     } catch (error) {
-      console.error("Error fetching menu:", error);
+      console.error("Error deleting menu:", error);
     }
   };
 
@@ -309,13 +312,13 @@ const ShopMenuComponent = () => {
         menu={currentMenu}
         price={price}
         options={options}
-        image={image}
+        picture={image}
         description={description}
         setDescription={setDescription}
         setMenu={setCurrentMenu}
         setPrice={setPrice}
         setOptions={setOptions}
-        setImage={setImage}
+        setPicture={setImage}
         onSave={handleSave}
         onDelete={() => handleDelete(currentMenu?.menuId || 0)}
       />
