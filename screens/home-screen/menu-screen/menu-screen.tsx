@@ -109,13 +109,16 @@ const ShopMenuComponent = () => {
   };
   const deleteMenu = async (menuId: number) => {
     try {
-      const response = await axios.post(
-        "https://ku-man.runnakjeen.com/shop/delete-menu",
-        { menuId: menuId },
-        HeadersToken
+      const response = await axios.delete(
+        `https://ku-man.runnakjeen.com/shop/delete-menu`,
+        {
+          params: { menuId },
+          ...HeadersToken,
+        }
       );
+      console.log("Menu deleted successfully:", response.data);
     } catch (error) {
-      console.error("Error fetching menu:", error);
+      console.error("Error deleting menu:", error);
     }
   };
 
