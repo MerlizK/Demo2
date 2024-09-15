@@ -8,3 +8,9 @@ const Colors = {
 };
 
 export default Colors;
+
+export const HeadersToken = {
+  headers: {
+    Authorization: `Bearer ${"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhdXRoMiIsImlhdCI6MTcyNjI0OTU3NSwiZXhwIjoxNzM0ODg5NTc1fQ.UhgA1-emXHRv69Yaba6x0TOVCIF3HKYrI5WsbrvS-nw"}`,
+  },
+};

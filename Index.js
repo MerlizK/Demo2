@@ -18,7 +18,9 @@ import AddOption from "./screens/home-screen/ShopCreateOption";
 import EditOption from "./screens/home-screen/ShopEditOption";
 import EditInfo from "./screens/home-screen/ShopEditInfo";
 import History from "./screens/home-screen/ShopOrderHistory";
+
 import LoginScreen from "./screens/login-screen";
+import MenuScreen from "./screens/home-screen/menu-screen/menu-screen";
 
 const Tab = createMaterialBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -50,7 +52,7 @@ function HomeTabs() {
       />
       <Tab.Screen
         name="TabMenu"
-        component={TabMenu}
+        component={MenuScreen}
         options={{
           tabBarLabel: "Menu",
           tabBarIcon: ({ color }) => (
