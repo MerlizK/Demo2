@@ -91,9 +91,9 @@ const ShopMenuComponent = () => {
   const editMenu = async (payload: {
     menuId: number;
     name: string;
-    picture: string;
+    picture?: string;
     price: number;
-    description: string;
+    description?: string;
     status: boolean;
   }) => {
     try {
@@ -102,6 +102,7 @@ const ShopMenuComponent = () => {
         payload,
         HeadersToken
       );
+      fetchMenuData();
     } catch (error) {
       console.error("Error fetching menu:", error);
     }
@@ -123,11 +124,13 @@ const ShopMenuComponent = () => {
   }, []);
 
   const toggleStatus = (menuId: number): void => {
-    setMenus((prevMenus) =>
-      prevMenus.map((menu) =>
-        menu.menuId === menuId ? { ...menu, available: !menu.status } : menu
-      )
-    );
+    const menu = menus.find((menu) => menu.menuId === menuId);
+
+    const payload = {
+      ...menu,
+      status: !menu.status,
+    };
+    editMenu(payload);
   };
 
   const openAddMenuModal = () => {
