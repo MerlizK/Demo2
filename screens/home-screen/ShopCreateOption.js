@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { ScrollView, TextInput, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Checkbox } from 'react-native-paper';
+import Colors from '../../Constants';
 
 export default function AddOption() {
   const navigation = useNavigation();
@@ -149,14 +150,14 @@ const styles = StyleSheet.create({
   },
   button: {
     alignItems: 'center',
-    backgroundColor: '#2C2C2C',
+    backgroundColor: Colors.PRIMARY_DARK,
     marginVertical: 50,
     padding: 10,
     width: 130,
     borderRadius: 10
   },
   addButton: {
-    backgroundColor: '#2C2C2C',
+    backgroundColor: Colors.PRIMARY_DARK,
     padding: 10,
     paddingHorizontal: 20,
     borderRadius: 10,

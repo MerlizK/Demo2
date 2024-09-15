@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 
 import Entypo from '@expo/vector-icons/Entypo';
+import Colors from '../Constants';
 
 export default function Menu({text}) {
   const [menuAva,setMenuAva] = useState(false);
@@ -127,7 +128,7 @@ const styles = StyleSheet.create({
     borderRadius: 100
   },
   addButton: {
-    backgroundColor: '#2C2C2C',
+    backgroundColor: Colors.PRIMARY_DARK,
     padding: 10,
     paddingHorizontal: 20,
     borderRadius: 10,

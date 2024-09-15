@@ -1,23 +1,26 @@
-import * as React from 'react';
-import { Text, View, Button } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createMaterialBottomTabNavigator } from 'react-native-paper/react-navigation';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import AntDesign from '@expo/vector-icons/AntDesign';
-import Feather from '@expo/vector-icons/Feather';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import * as React from "react";
+import { Text, View, Button } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createMaterialBottomTabNavigator } from "react-native-paper/react-navigation";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import Feather from "@expo/vector-icons/Feather";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
-import TabOrder from './TabShopSelectOrder';
-import TabInfo from './TabShopInfo';
-import TabTime from './TabShopSettingTime';
-import TabMenu from './TabShopMenu';
-import CreateMenu from './ShopCreateMenu';
-import EditMenu from './ShopEditMenu';
-import AddOption from './ShopCreateOption';
-import EditOption from './ShopEditOption';
-import EditInfo from './ShopEditInfo';
-import History from './ShopOrderHistory';
+import TabOrder from "./screens/home-screen/TabShopSelectOrder";
+import TabInfo from "./screens/home-screen/TabShopInfo";
+import TabTime from "./screens/home-screen/TabShopSettingTime";
+import TabMenu from "./screens/home-screen/TabShopMenu";
+import CreateMenu from "./screens/home-screen/ShopCreateMenu";
+import EditMenu from "./screens/home-screen/ShopEditMenu";
+import AddOption from "./screens/home-screen/ShopCreateOption";
+import EditOption from "./screens/home-screen/ShopEditOption";
+import EditInfo from "./screens/home-screen/ShopEditInfo";
+import History from "./screens/home-screen/ShopOrderHistory";
+
+import LoginScreen from "./screens/login-screen";
+import MenuScreen from "./screens/home-screen/menu-screen/menu-screen";
 
 const Tab = createMaterialBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -26,53 +29,52 @@ function EmptyScreen() {
   return <View />;
 }
 
-
 function HomeTabs() {
   return (
-    <Tab.Navigator 
+    <Tab.Navigator
       screenOptions={{ headerShown: false }}
       initialRouteName="TabOrder"
       activeColor="#009951"
-      inactiveColor='#545454'
+      inactiveColor="#545454"
       labelStyle={{ fontSize: 12 }}
-      barStyle={{ backgroundColor: 'white' , height: 70 }}
-      theme={{ colors: { secondaryContainer: 'transparent' } }}
+      barStyle={{ backgroundColor: "white", height: 70 }}
+      theme={{ colors: { secondaryContainer: "transparent" } }}
     >
-      <Tab.Screen 
-        name="TabOrder" 
+      <Tab.Screen
+        name="TabOrder"
         component={TabOrder}
         options={{
-          tabBarLabel: 'Order',
+          tabBarLabel: "Order",
           tabBarIcon: ({ color }) => (
             <AntDesign name="profile" size={24} color={color} />
           ),
         }}
       />
-      <Tab.Screen 
-        name="TabMenu" 
-        component={TabMenu}
+      <Tab.Screen
+        name="TabMenu"
+        component={MenuScreen}
         options={{
-          tabBarLabel: 'Menu',
+          tabBarLabel: "Menu",
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons name="food" size={24} color={color} />
           ),
         }}
       />
-      <Tab.Screen 
-        name="TabTime" 
+      <Tab.Screen
+        name="TabTime"
         component={TabTime}
         options={{
-          tabBarLabel: 'Time',
+          tabBarLabel: "Time",
           tabBarIcon: ({ color }) => (
             <Feather name="clock" size={24} color={color} />
           ),
         }}
       />
-      <Tab.Screen 
-        name="TabShop" 
+      <Tab.Screen
+        name="TabShop"
         component={TabInfo}
         options={{
-          tabBarLabel: 'Shop',
+          tabBarLabel: "Shop",
           tabBarIcon: ({ color }) => (
             <Ionicons name="person-circle-outline" size={24} color={color} />
           ),
@@ -86,6 +88,7 @@ function Index() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Home" component={HomeTabs} />
         <Stack.Screen name="CreateMenu" component={CreateMenu} />
         <Stack.Screen name="EditMenu" component={EditMenu} />

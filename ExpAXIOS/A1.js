@@ -9,6 +9,8 @@ import OrderH from './components/OrderH';
 
 import Entypo from '@expo/vector-icons/Entypo';
 
+import Colors from '../Constants';
+
 export default function History() {
   const navigation = useNavigation();
 
@@ -137,7 +139,7 @@ const styles = StyleSheet.create({
     padding:5,
     alignItems:'center',
     alignSelf: 'center',
-    backgroundColor: '#2C2C2C',
+    backgroundColor: Colors.PRIMARY_DARK,
     borderRadius: 10,
     marginTop: 100,
   }
