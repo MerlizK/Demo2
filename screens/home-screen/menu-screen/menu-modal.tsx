@@ -67,11 +67,12 @@ const MenuModal: React.FC<MenuModalProps> = ({
   const handleImagePick = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
+      quality: 0.5,
+      base64: true,
     });
 
     if (!result.canceled) {
-      const selectedImageUri = result.assets[0].uri || null;
+      const selectedImageUri = result.assets[0].base64 || null;
       setPicture(selectedImageUri);
       console.log(result);
     } else {
@@ -175,7 +176,7 @@ const MenuModal: React.FC<MenuModalProps> = ({
               onPress={handleImagePick}
             >
               {picture ? (
-                <Image source={{ uri: picture }} style={styles.imagePreview} />
+                <Image source={{ uri: `data:image/jpeg;base64,${picture}`}} style={styles.imagePreview} />
               ) : (
                 <Text style={styles.description}>Select Image</Text>
               )}

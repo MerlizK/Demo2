@@ -238,11 +238,11 @@ const ShopMenuComponent = () => {
             <View key={menu.menuId} style={styles.menuItem}>
               <View style={{ flexDirection: "column", flex: 1 }}>
                 <Text style={styles.menuName}>{menu.name}</Text>
-                <Text style={styles.menuPrice}>{menu.price}</Text>
+                <Text style={styles.menuPrice}>{menu.price} บาท</Text>
               </View>
               {menu.picture && (
                 <Image
-                  source={{ uri: menu.picture }}
+                  source={{ uri: `data:image/jpeg;base64,${menu.picture}`}}
                   style={styles.menuImage}
                 />
               )}
@@ -287,9 +287,9 @@ const ShopMenuComponent = () => {
         <TouchableOpacity style={styles.addButton} onPress={openAddMenuModal}>
           <Text style={styles.addButtonText}>เพิ่มเมนู</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.addButton} onPress={handleSaveMenu}>
+        {/* <TouchableOpacity style={styles.addButton} onPress={handleSaveMenu}>
           <Text style={styles.addButtonText}>บันทึกการตั้งค่าเมนู</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       <Modal
@@ -358,18 +358,19 @@ const styles = StyleSheet.create({
   description: { color: "#000", fontSize: 16 },
   shopName: {
     color: "#000",
-    marginTop: 70,
-    fontSize: 24,
+    marginTop: 50,
+    fontSize: 36,
     fontWeight: "bold",
     marginBottom: 20,
   },
   statusRow: {
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: 25,
   },
   statusText: {
     color: "#000",
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: "bold",
   },
   statusButton: {
@@ -398,14 +399,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   menuPrice: {
-    color: "#000",
-    fontSize: 16,
+    color: "gray",
+    fontSize: 14,
   },
   menuImage: {
     width: 60,
     height: 40,
     borderRadius: 4,
-    flex: 1,
+    // flex: 1,
   },
   statusAvailable: {
     backgroundColor: "green",
