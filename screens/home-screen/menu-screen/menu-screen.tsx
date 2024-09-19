@@ -25,7 +25,6 @@ interface Option {
 
 interface SubOption {
   name: string;
-  subOptionId: string;
   price: string;
 }
 
@@ -46,8 +45,10 @@ const ShopMenuComponent = () => {
     data: [],
   });
   const [menus, setMenus] = useState<MenuItem[]>([]);
+
   const [isOpen, setIsOpen] = useState(data.isOpen);
   const [isAddMenuVisible, setIsAddMenuVisible] = useState(false);
+  const [isOption, setIsOption] = useState(false);
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
   const [currentMenu, setCurrentMenu] = useState<MenuItem | null>(null);
   const [confirmAction, setConfirmAction] = useState<null | "save" | "delete">(
@@ -72,13 +73,13 @@ const ShopMenuComponent = () => {
         `${APIURL}shop/menu`,
         HeadersToken
       );
-
       setData(response.data as any);
       setMenus(response.data as unknown as MenuItem[]);
     } catch (error) {
       console.error("Error fetching menu:", error);
     }
   };
+
   const handleRefresh = async () => {
     setRefreshing(true);
     await fetchMenuData();
@@ -147,6 +148,7 @@ const ShopMenuComponent = () => {
   };
 
   const openAddMenuModal = () => {
+    setIsOption(false);
     setCurrentMenu(null);
     setPrice(0);
     setOptions([]);
@@ -160,14 +162,28 @@ const ShopMenuComponent = () => {
     console.log("Save menu menu", menus);
   };
 
-  const openEditMenuModal = (menu: MenuItem) => {
-    setCurrentMenu(menu);
-    setPrice(menu.price || 0);
-    setOptions(menu.option || []);
-    setImage(menu.picture || null);
-    setDescription(menu.description || "");
-    setIsAddMenuVisible(true);
-    console.log(currentMenu);
+  const openEditMenuModal = async (menu: MenuItem) => {
+    setIsOption(false);
+    try {
+      const response = await axios.get(
+        `${APIURL}shop/menu/info`,
+        {
+          params: { menuId: menu.menuId },
+          ...HeadersToken
+        }
+      );
+
+      setCurrentMenu(menu);
+      setPrice(menu.price || 0);
+      setOptions(formatToResponse(response.data.option) || []);
+      setImage(menu.picture || null);
+      setDescription(menu.description || "");
+      setIsAddMenuVisible(true);
+      // console.log(formatToResponse(response.data.option));
+      console.log(response.data.option);
+    } catch (error) {
+      console.error("Error fetching option:", error);
+    }
   };
 
   const handleSave = () => {
@@ -180,7 +196,7 @@ const ShopMenuComponent = () => {
     setConfirmAction("delete");
     setIsConfirmModalVisible(true);
   };
-  function formatToRequest(optionData: Option[]): any[] {
+  const formatToRequest = (optionData: Option[]) => {
     if (!Array.isArray(optionData)) {
       throw new TypeError("optionData must be an array");
     }
@@ -209,6 +225,20 @@ const ShopMenuComponent = () => {
     });
   }
 
+  function formatToResponse(options: any[]): Option[] {
+    return options.map((option, index) => ({
+      name: option.name,
+      optionId: index.toString(),
+      require: option.mustChoose,
+      numberMinMax: [option.minChoose, option.maxChoose],
+      subOption: option.optionItem?.map((item: any) => ({
+        name: item.name,
+        price: item.price.toString()
+      }))
+    }));
+
+  }
+
   const confirmActionHandler = () => {
     if (confirmAction === "save") {
       if (currentMenu && currentMenu.menuId) {
@@ -222,6 +252,7 @@ const ShopMenuComponent = () => {
           option: formatToRequest(options)
         };
         console.log("payload ", payload);
+        console.log("payload ooo ", payload.option[0].optionItems);
         editMenu(payload);
       } else {
         const payload = {
@@ -275,7 +306,7 @@ const ShopMenuComponent = () => {
               </View>
               {menu.picture && (
                 <Image
-                  source={{ uri: `data:image/jpeg;base64,${menu.picture}` }}
+                  source={{ uri: `${menu.picture}` }}
                   style={styles.menuImage}
                 />
               )}
@@ -359,6 +390,8 @@ const ShopMenuComponent = () => {
         options={options}
         picture={image}
         description={description}
+        isOption={isOption}
+        setIsOption={setIsOption}
         setDescription={setDescription}
         setMenu={setCurrentMenu}
         setPrice={setPrice}

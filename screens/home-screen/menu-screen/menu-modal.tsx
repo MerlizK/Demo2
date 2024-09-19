@@ -11,6 +11,7 @@ import {
 } from "react-native";
 
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from 'expo-file-system';
 import CustomCheckbox from "../../../components/checkbox";
 
 import Entypo from "@expo/vector-icons/Entypo";
@@ -19,13 +20,12 @@ interface Option {
   name: string;
   optionId: string;
   require: boolean;
-  numberminmax: [number, number];
+  numberMinMax: [number, number];
   subOption: SubOption[];
 }
 
 interface SubOption {
   name: string;
-  subOptionId: string;
   price: string;
 }
 
@@ -44,6 +44,8 @@ interface MenuModalProps {
   setPicture: React.Dispatch<React.SetStateAction<string | null>>;
   onSave: () => void;
   onDelete: () => void;
+  isOption: boolean;
+  setIsOption: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const MenuModal: React.FC<MenuModalProps> = ({
@@ -61,21 +63,30 @@ const MenuModal: React.FC<MenuModalProps> = ({
   setPicture,
   onSave,
   onDelete,
+  isOption,
+  setIsOption
 }) => {
-  const [isOption, setIsOption] = useState(false);
+
 
   const handleImagePick = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      const selectedImageUri = result.assets[0].uri || null;
-      setPicture(selectedImageUri);
-      console.log(result);
-    } else {
-      console.log("User cancelled image picker");
+    try {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 1,
+      });
+      if (!result.canceled) {
+        const selectedImageUri = result.assets[0].uri || null;
+        if (selectedImageUri) {
+          const base64String = await FileSystem.readAsStringAsync(selectedImageUri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          setPicture(`data:image/jpeg;base64,${base64String}`);
+        }
+      } else {
+        console.log("User cancelled image picker");
+      }
+    } catch (error) {
+      console.error("Error picking image:", error);
     }
   };
 
@@ -87,7 +98,6 @@ const MenuModal: React.FC<MenuModalProps> = ({
   const [newSubOption, setNewSubOption] = useState({
     name: "",
     price: "",
-    subOptionId: (subOptions.length + 1).toString(),
   });
   const [optionName, setOptionName] = useState("");
 
@@ -96,7 +106,6 @@ const MenuModal: React.FC<MenuModalProps> = ({
     setNewSubOption({
       name: "",
       price: "",
-      subOptionId: (subOptions.length + 1).toString(),
     });
   };
 
@@ -116,7 +125,7 @@ const MenuModal: React.FC<MenuModalProps> = ({
       name: optionName,
       optionId: currentOption,
       require: isRequired,
-      numberminmax: [minmax[0], minmax[1]],
+      numberMinMax: [minmax[0], minmax[1]],
       subOption: subOptions,
     };
     const optionIndex = options.findIndex(
@@ -175,7 +184,7 @@ const MenuModal: React.FC<MenuModalProps> = ({
               onPress={handleImagePick}
             >
               {picture ? (
-                <Image source={{ uri: `data:image/jpeg;base64,${picture}` }} style={styles.imagePreview} />
+                <Image source={{ uri: picture }} style={styles.imagePreview} />
               ) : (
                 <Text style={styles.description}>Select Image</Text>
               )}
@@ -196,24 +205,24 @@ const MenuModal: React.FC<MenuModalProps> = ({
               {options &&
                 options.map((item: Option, index) => (
                   <View key={index}>
-                    {/* Row for item.name and SettingIcon */}
                     <View style={styles.optionRow}>
                       <Text style={{ fontWeight: "bold", color: "black" }}>
                         {item.name}
                       </Text>
                       <TouchableOpacity
                         onPress={() => {
+                          setOptionName(item.name);
+                          console.log('item ', item);
                           setCurrentOption(item.optionId);
-                          setMinMax(item.numberminmax);
+                          setMinMax(item.numberMinMax);
                           setIsOption(true);
                           setSubOptions(item.subOption);
                           setIsRequired(item.require);
                           setIsSingleChoice(
-                            item.numberminmax[0] === 1 &&
-                            item.numberminmax[1] === 1 &&
-                            true
+                            item.numberMinMax[0] === 1 &&
+                            item.numberMinMax[1] === 1
                           );
-                          setOptionName(item.name);
+
                         }}
                       >
                         <Entypo
@@ -224,8 +233,6 @@ const MenuModal: React.FC<MenuModalProps> = ({
                         />
                       </TouchableOpacity>
                     </View>
-
-                    {/* Rows for subItem.name and subItem.price */}
                     {item.subOption?.map((subItem, subIndex) => (
                       <View key={subIndex} style={styles.subOptionRow}>
                         <Text style={styles.description}>{subItem.name}</Text>
