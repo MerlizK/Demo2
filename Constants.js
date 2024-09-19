@@ -11,6 +11,9 @@ export default Colors;
 
 export const HeadersToken = {
   headers: {
-    Authorization: `Bearer ${"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhdXRoMyIsImlhdCI6MTcyNjU5MTA0OSwiZXhwIjoxNzM1MjMxMDQ5fQ.-J5Y0eZ_OlTrcZXIDnSdF712HugreecnSZPnP2_WRTI"}`,
+    Authorization: `Bearer ${"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhdXRoMyIsImlhdCI6MTcyNjc0NjMzOSwiZXhwIjoxNzM1Mzg2MzM5fQ.BYqdj2CjAsFLf3bS_HLKdbwsdaiA2dx5n3WSb-9oRYA"}`,
   },
 };
+
+export const APIURL = "https://ku-man-api.vimforlanie.com/";
+

@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useEffect } from "react";
 import { createMaterialBottomTabNavigator } from "react-native-paper/react-navigation";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -9,6 +9,7 @@ import TabOrder from "./TabShopSelectOrder";
 import TabInfo from "./TabShopInfo";
 import TabTime from "./TabShopSettingTime";
 import MenuScreen from "./menu-screen/menu-screen";
+import useShopStore from "../../ShopStore";
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -17,7 +18,8 @@ function HomeTabs() {
 
   useEffect(() => {
     fetchShopData();
-  }, []);
+  }, [fetchShopData]);
+
   return (
     <Tab.Navigator
       screenOptions={{ headerShown: false }}

@@ -175,7 +175,7 @@ const MenuModal: React.FC<MenuModalProps> = ({
               onPress={handleImagePick}
             >
               {picture ? (
-                <Image source={{ uri: picture }} style={styles.imagePreview} />
+                <Image source={{ uri: `data:image/jpeg;base64,${picture}` }} style={styles.imagePreview} />
               ) : (
                 <Text style={styles.description}>Select Image</Text>
               )}
@@ -210,8 +210,8 @@ const MenuModal: React.FC<MenuModalProps> = ({
                           setIsRequired(item.require);
                           setIsSingleChoice(
                             item.numberminmax[0] === 1 &&
-                              item.numberminmax[1] === 1 &&
-                              true
+                            item.numberminmax[1] === 1 &&
+                            true
                           );
                           setOptionName(item.name);
                         }}
