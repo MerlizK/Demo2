@@ -61,7 +61,7 @@ const ShopMenuComponent = () => {
   const fetchMenuData = async () => {
     try {
       const response = await axios.get(
-        "https://ku-man.runnakjeen.com/shop/menu",
+        "https://ku-man-api.vimforlanie.com/shop/menu",
         HeadersToken
       );
 
@@ -84,10 +84,11 @@ const ShopMenuComponent = () => {
     picture: string;
     price: number;
     description: string;
+    option: [];
   }) => {
     try {
       const response = await axios.post(
-        "https://ku-man.runnakjeen.com/shop/create-menu",
+        "https://ku-man-api.vimforlanie.com/shop/create-menu",
         payload,
         HeadersToken
       );
@@ -102,10 +103,11 @@ const ShopMenuComponent = () => {
     price: number;
     description?: string;
     status: boolean;
+    option: [];
   }) => {
     try {
       const response = await axios.post(
-        "https://ku-man.runnakjeen.com/shop/edit-menu",
+        "https://ku-man-api.vimforlanie.com/shop/edit-menu",
         payload,
         HeadersToken
       );
@@ -117,7 +119,7 @@ const ShopMenuComponent = () => {
   const deleteMenu = async (menuId: number) => {
     try {
       const response = await axios.delete(
-        `https://ku-man.runnakjeen.com/shop/delete-menu`,
+        `https://ku-man-api.vimforlanie.com/shop/delete-menu`,
         {
           params: { menuId },
           ...HeadersToken,
@@ -188,6 +190,7 @@ const ShopMenuComponent = () => {
           price: price,
           description: description,
           status: currentMenu.status,
+          option: []
         };
         console.log("payload ", payload);
         editMenu(payload);
@@ -197,6 +200,7 @@ const ShopMenuComponent = () => {
           picture: image || "",
           price: price || 0,
           description: description || "",
+          option: []
         };
         console.log("payload ", payload);
         createMenu(payload);
