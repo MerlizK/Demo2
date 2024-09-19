@@ -84,7 +84,6 @@ const ShopMenuComponent = () => {
     picture: string;
     price: number;
     description: string;
-    option: [];
   }) => {
     try {
       const response = await axios.post(
@@ -103,7 +102,6 @@ const ShopMenuComponent = () => {
     price: number;
     description?: string;
     status: boolean;
-    option: [];
   }) => {
     try {
       const response = await axios.post(
@@ -190,7 +188,6 @@ const ShopMenuComponent = () => {
           price: price,
           description: description,
           status: currentMenu.status,
-          option: []
         };
         console.log("payload ", payload);
         editMenu(payload);
@@ -200,7 +197,6 @@ const ShopMenuComponent = () => {
           picture: image || "",
           price: price || 0,
           description: description || "",
-          option: []
         };
         console.log("payload ", payload);
         createMenu(payload);
