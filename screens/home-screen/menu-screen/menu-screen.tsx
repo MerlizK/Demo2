@@ -12,6 +12,7 @@ import axios from "axios";
 import MenuModal from "./menu-modal";
 import Entypo from "@expo/vector-icons/Entypo";
 import { HeadersToken } from "../../../Constants";
+import useShopStore from "../../../ShopStore";
 
 interface Option {
   name: string;
@@ -121,9 +122,11 @@ const ShopMenuComponent = () => {
       console.error("Error deleting menu:", error);
     }
   };
+  const { shopData } = useShopStore();
 
   useEffect(() => {
     fetchMenuData();
+    console.log(shopData);
   }, []);
 
   const toggleStatus = (menuId: number): void => {
