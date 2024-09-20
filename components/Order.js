@@ -31,14 +31,14 @@ export default function Menu({text}) {
 
   return (
   <View>
-    {menuIn ? ( 
+    {menuIn && ( 
     <View style={styles.container}>
       <View>
       <Entypo name="location-pin" size={24} color="black" />
       </View>
       <View style={{paddingRight:60}}>
         <Text style={{fontSize:16}}>ออเดอร์ที่ {text}</Text>
-        {menuAva ? (
+        {menuAva && (
           <View style={{paddingLeft:30}}>
             <Text>เมนูที่ 1</Text>
             <Text>จำนวนที่สั่ง</Text>
@@ -46,17 +46,16 @@ export default function Menu({text}) {
             <Text>Comment</Text>
           </View>
           
-        ):
-        null
+        )
         }
       </View>
       <View>
         <Text>ค่าอาหาร</Text>
-        {menuAva ? ( <Text>ราคา</Text> ) : (null) }
+        {menuAva && ( <Text>ราคา</Text> )}
       </View>
       <View>
         <Text>xx.xx บาท</Text>
-        {menuAva ? ( <Text>xx.xx บาท</Text> ) : (null) }
+        {menuAva && ( <Text>xx.xx บาท</Text> )}
       </View>
       <TouchableOpacity onPress={toggleMenuAva} style={menuAva ? styles.menuYButton : styles.menuXButton}>
         {menuAva ? 
@@ -65,17 +64,17 @@ export default function Menu({text}) {
         }
       </TouchableOpacity>
     </View>
-    ) : null }
-    {menuIn ? ( 
+    )}
+    {menuIn && ( 
       <View>
-      {menuAva ? ( 
-        <TouchableOpacity onPress={() => setIsModalVisible(true)} style={styles.addButton}>
+      {menuAva && ( 
+        <TouchableOpacity onPress={() => setIsModalVisible(!isModalVisible)} style={styles.addButton}>
           <Text style={{color:'white'}}>ทำอาหารเสร็จแล้ว</Text>
         </TouchableOpacity>
         
-        ) : null}
+        )}
       </View>
-    ) : null}
+    )}
 
       <Modal visible={isModalVisible} transparent={true}>
         <View style={styles.modalBackground}>

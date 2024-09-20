@@ -19,8 +19,33 @@ export default function TabOrder() {
 
   return (
     <View style={styles.container}>
-      <ScrollView>
-        <SHeader text="รายการออเดอร์" />
+      <SHeader text="รายการออเดอร์" />
+      <View
+        style={{
+          alignSelf: "center",
+          // position: "absolute",
+          // bottom: 50,
+          marginTop: 30,
+          marginBottom: 20,
+          flexDirection: "row",
+          gap: 10,
+        }}
+      >
+        <Text style={{ alignSelf: "center", fontSize: 22, fontWeight: "bold" }}>
+          สถานะร้าน :
+        </Text>
+        <TouchableOpacity
+          onPress={toggleShopAva}
+          style={shopAva ? styles.menuYButton : styles.menuXButton}
+        >
+          <Text style={{ fontSize: 18, color: "white" }}>
+            {shopAva ? "ร้านเปิด" : "ร้านปิด "}
+          </Text>
+        </TouchableOpacity>
+      </View>
+      <ScrollView 
+        style={{
+        flex: 1,}}>
         {shopAva ? (
           <View>
             <Order text="1" />
@@ -39,28 +64,8 @@ export default function TabOrder() {
             <Text style={{ color: "gray", fontSize: 30 }}>ยังไม่มีออเดอร์</Text>
           </View>
         )}
+        <View style={{height:20}}/>
       </ScrollView>
-      <View
-        style={{
-          alignSelf: "center",
-          position: "absolute",
-          bottom: 50,
-          marginBottom: 30,
-          flexDirection: "row",
-        }}
-      >
-        <Text style={{ alignSelf: "center", fontSize: 22, fontWeight: "bold" }}>
-          สถานะร้าน :
-        </Text>
-        <TouchableOpacity
-          onPress={toggleShopAva}
-          style={shopAva ? styles.menuYButton : styles.menuXButton}
-        >
-          <Text style={{ fontSize: 18, color: "white" }}>
-            {shopAva ? "ร้านเปิด" : "ร้านปิด "}
-          </Text>
-        </TouchableOpacity>
-      </View>
       <StatusBar style="auto" />
     </View>
   );
@@ -86,7 +91,7 @@ const styles = StyleSheet.create({
   },
   menuYButton: {
     backgroundColor: "#009951",
-    marginLeft: 30,
+    marginLeft: 10,
     width: 120,
     height: 50,
     alignItems: "center",
@@ -95,7 +100,7 @@ const styles = StyleSheet.create({
   },
   menuXButton: {
     backgroundColor: "#C00F0C",
-    marginLeft: 30,
+    marginLeft: 10,
     width: 120,
     height: 50,
     alignItems: "center",
