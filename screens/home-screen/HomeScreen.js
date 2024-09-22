@@ -13,12 +13,16 @@ import useShopStore from "../../ShopStore";
 
 const Tab = createMaterialBottomTabNavigator();
 
-function HomeTabs() {
+function HomeTabs({ token }) {
+  const { token } = route.params;
+
   const { fetchShopData } = useShopStore();
 
   useEffect(() => {
-    fetchShopData();
-  }, [fetchShopData]);
+    if (token) {
+      fetchShopData(token);
+    }
+  }, [token]);
 
   return (
     <Tab.Navigator

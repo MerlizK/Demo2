@@ -1,6 +1,5 @@
-import { KuScreens } from '../../../navigation/un-auth-stack';
-import { useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
+import { useNavigation } from "@react-navigation/native";
+import React, { useState } from "react";
 import {
   View,
   TextInput,
@@ -9,29 +8,65 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Image,
-} from 'react-native';
-import { launchImageLibrary } from 'react-native-image-picker';
-import CamIcon from '../assets/icons/camera.svg';
+  Alert,
+} from "react-native";
+import { launchImageLibrary } from "react-native-image-picker";
+import axios from "axios";
+import { APIURL } from "../Constants";
+import Entypo from "@expo/vector-icons/Entypo";
 
-const KRegisterScreen = () => {
+const sampleRes = {
+  canteenId: 0,
+  username: "string",
+  password: "string",
+  shopName: "string",
+  profilePicture: "string",
+  tel: "string",
+  shopNumber: "string",
+};
+
+const RegisterScreen = () => {
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [base64Image, setBase64Image] = useState<string | null>(null);
   const navigation = useNavigation();
+
+  const handleRegister = async () => {
+    try {
+      const payload = {
+        ...sampleRes,
+        profilePicture: base64Image, // Add the Base64 encoded image to the payload
+      };
+      const response = await axios.post(`${APIURL}shop/create-shop`, payload);
+      if (response.status === 201) {
+        const { token } = response.data;
+        navigation.navigate("HomeTabs", { token });
+      } else {
+        Alert.alert("Login Failed", "Invalid username or password");
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+      Alert.alert("Login Error", "An error occurred during login");
+    }
+  };
 
   const handleImagePick = () => {
     launchImageLibrary(
       {
-        mediaType: 'photo',
+        mediaType: "photo",
         quality: 1,
+        includeBase64: true,
       },
-      response => {
+      (response) => {
         if (response.didCancel) {
-          console.log('User cancelled image picker');
+          console.log("User cancelled image picker");
         } else if (response.errorCode) {
-          console.log('ImagePicker Error: ', response.errorCode);
+          console.log("ImagePicker Error: ", response.errorCode);
         } else {
-          setImageUri(response.assets?.[0].uri || null);
+          const selectedImage = response.assets?.[0];
+          setImageUri(selectedImage?.uri || null);
+          setBase64Image(selectedImage?.base64 || null); // Save the Base64 string
         }
-      },
+      }
     );
   };
 
@@ -61,11 +96,17 @@ const KRegisterScreen = () => {
 
         <TouchableOpacity
           style={styles.imageUploadContainer}
-          onPress={handleImagePick}>
+          onPress={handleImagePick}
+        >
           {imageUri ? (
             <Image source={{ uri: imageUri }} style={styles.imagePreview} />
           ) : (
-            <CamIcon width={50} height={50} />
+            <Entypo
+              style={{ marginTop: 10 }}
+              name="chevron-small-down"
+              size={48}
+              color="black"
+            />
           )}
         </TouchableOpacity>
 
@@ -86,7 +127,8 @@ const KRegisterScreen = () => {
 
         <TouchableOpacity
           style={styles.registerButton}
-          onPress={() => navigation.navigate(KuScreens.KHOMESCREEN as never)}>
+          onPress={handleRegister}
+        >
           <Text style={styles.registerButtonText}>สร้างร้าน</Text>
         </TouchableOpacity>
       </View>
@@ -97,53 +139,53 @@ const KRegisterScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   header: {
-    color: '#000',
+    color: "#000",
     left: 20,
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginVertical: 20,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
   formContainer: {
-    width: '90%',
+    width: "90%",
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     marginBottom: 20,
     marginHorizontal: 20,
   },
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 15,
   },
   label: {
     width: 100,
     fontSize: 16,
-    color: '#000',
+    color: "#000",
     marginRight: 10,
   },
   input: {
-    color: '#000',
+    color: "#000",
     flex: 1,
     padding: 10,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 5,
   },
   imageUploadContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginVertical: 20,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 5,
     padding: 10,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: "#f0f0f0",
   },
   imagePreview: {
     width: 100,
@@ -151,17 +193,17 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   registerButton: {
-    width: '100%',
-    backgroundColor: '#000',
+    width: "100%",
+    backgroundColor: "#000",
     padding: 15,
     borderRadius: 5,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 20,
   },
   registerButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
 
-export default KRegisterScreen;
+export default RegisterScreen;

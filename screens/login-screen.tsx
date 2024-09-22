@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   View,
   TextInput,
@@ -7,37 +7,45 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Alert,
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import AppLogo from '../assets/icons/app-logo.svg'
-import ForgotPasswordModal from '../components/forgot-modal';
-import LoadingScreen from '../components/loading';
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import AppLogo from "../assets/icons/app-logo.svg";
+import ForgotPasswordModal from "../components/forgot-modal";
+import LoadingScreen from "../components/loading";
+import axios from "axios";
+import { APIURL } from "../Constants";
 
 const LoginScreen = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [isModalVisible, setModalVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); 
+  const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
-
-  const handleLogin = () => {
-    setTimeout(() => {
-      const mockUsername = '1111';
-      const mockPassword = '1111';
-
-      const responseStatus = 1000;
-      username === mockUsername && password === mockPassword ? 1000 : 400;
-
-      if (responseStatus !== 1000) {
-        Alert.alert('Login Failed', 'Invalid username or password');
+  const handleLogin = async () => {
+    try {
+      const requestBody = {
+        username: username,
+        password: password,
+      };
+      const response = await axios.post(`${APIURL}shop/login`, requestBody, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.status === 201) {
+        const { token } = response.data;
+        navigation.navigate("HomeTabs", { token });
       } else {
-        navigation.navigate('Home' as never);
+        Alert.alert("Login Failed", "Invalid username or password");
       }
-    }, 2000);
+    } catch (error) {
+      console.error("Error during login:", error);
+      Alert.alert("Login Error", "An error occurred during login");
+    }
   };
 
   const handleRegister = () => {
-    navigation.navigate('Register' as never);
+    navigation.navigate("Register" as never);
   };
 
   const openForgotPasswordModal = () => {
@@ -85,7 +93,8 @@ const LoginScreen = () => {
 
         <TouchableOpacity
           style={styles.registerButton}
-          onPress={handleRegister}>
+          onPress={handleRegister}
+        >
           <Text style={styles.registerButtonText}>Register</Text>
         </TouchableOpacity>
 
@@ -107,66 +116,66 @@ const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   logoContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 30,
   },
   formContainer: {
-    width: '90%',
+    width: "90%",
     padding: 20,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 10,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     marginBottom: 20,
     marginHorizontal: 20,
   },
   label: {
     fontSize: 16,
-    color: '#000',
+    color: "#000",
     marginBottom: 5,
   },
   input: {
-    color: '#000',
-    width: '100%',
+    color: "#000",
+    width: "100%",
     padding: 15,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 5,
     marginBottom: 15,
   },
   loginButton: {
-    width: '100%',
-    backgroundColor: '#4CAF50',
+    width: "100%",
+    backgroundColor: "#4CAF50",
     padding: 15,
     borderRadius: 5,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 10,
   },
   loginButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
   },
   registerButton: {
-    width: '100%',
-    backgroundColor: '#DFF5E2',
+    width: "100%",
+    backgroundColor: "#DFF5E2",
     padding: 15,
     borderRadius: 5,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 10,
   },
   registerButtonText: {
-    color: '#4CAF50',
-    fontWeight: 'bold',
+    color: "#4CAF50",
+    fontWeight: "bold",
   },
   forgotPassword: {
-    color: '#000',
-    textDecorationLine: 'underline',
+    color: "#000",
+    textDecorationLine: "underline",
   },
 });
 

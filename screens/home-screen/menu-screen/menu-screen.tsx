@@ -39,7 +39,7 @@ interface MenuItem {
   shopId?: number;
 }
 
-const ShopMenuComponent = () => {
+const ShopMenuComponent = (token: String) => {
   const [data, setData] = useState<{ isOpen: boolean; data: MenuItem[] }>({
     isOpen: true,
     data: [],
@@ -59,20 +59,17 @@ const ShopMenuComponent = () => {
   const [image, setImage] = useState<string | null>(null);
   const [description, setDescription] = useState<string>("");
   const [refreshing, setRefreshing] = useState(false);
-  const [shopName, setShopName] = useState('');
+  const [shopName, setShopName] = useState("");
 
   const { shopData } = useShopStore();
 
   useEffect(() => {
-    setShopName(shopData.shopName)
+    setShopName(shopData.shopName);
   }, [shopData]);
 
   const fetchMenuData = async () => {
     try {
-      const response = await axios.get(
-        `${APIURL}shop/menu`,
-        HeadersToken
-      );
+      const response = await axios.get(`${APIURL}shop/menu`, HeadersToken);
       setData(response.data as any);
       setMenus(response.data as unknown as MenuItem[]);
     } catch (error) {
@@ -93,11 +90,7 @@ const ShopMenuComponent = () => {
     description: string;
   }) => {
     try {
-      await axios.post(
-        `${APIURL}shop/create-menu`,
-        payload,
-        HeadersToken
-      );
+      await axios.post(`${APIURL}shop/create-menu`, payload, HeadersToken);
     } catch (error) {
       console.error("Error fetching menu:", error);
     }
@@ -111,11 +104,7 @@ const ShopMenuComponent = () => {
     status: boolean;
   }) => {
     try {
-      await axios.post(
-        `${APIURL}shop/edit-menu`,
-        payload,
-        HeadersToken
-      );
+      await axios.post(`${APIURL}shop/edit-menu`, payload, HeadersToken);
       fetchMenuData();
     } catch (error) {
       console.error("Error fetching menu:", error);
@@ -123,19 +112,15 @@ const ShopMenuComponent = () => {
   };
   const deleteMenu = async (menuId: number) => {
     try {
-      const response = await axios.delete(
-        `${APIURL}shop/delete-menu`,
-        {
-          params: { menuId },
-          ...HeadersToken,
-        }
-      );
+      const response = await axios.delete(`${APIURL}shop/delete-menu`, {
+        params: { menuId },
+        ...HeadersToken,
+      });
       console.log("Menu deleted successfully:", response.data);
     } catch (error) {
       console.error("Error deleting menu:", error);
     }
   };
-
 
   const toggleStatus = (menuId: number): void => {
     const menu = menus.find((menu) => menu.menuId === menuId);
@@ -165,13 +150,10 @@ const ShopMenuComponent = () => {
   const openEditMenuModal = async (menu: MenuItem) => {
     setIsOption(false);
     try {
-      const response = await axios.get(
-        `${APIURL}shop/menu/info`,
-        {
-          params: { menuId: menu.menuId },
-          ...HeadersToken
-        }
-      );
+      const response = await axios.get(`${APIURL}shop/menu/info`, {
+        params: { menuId: menu.menuId },
+        ...HeadersToken,
+      });
 
       setCurrentMenu(menu);
       setPrice(menu.price || 0);
@@ -202,7 +184,7 @@ const ShopMenuComponent = () => {
     }
 
     return optionData.map((option: Option) => {
-      if (!option || typeof option !== 'object') {
+      if (!option || typeof option !== "object") {
         throw new TypeError("Invalid option object");
       }
 
@@ -217,13 +199,13 @@ const ShopMenuComponent = () => {
         minChoose: minChoose,
         optionItems: Array.isArray(option.subOption)
           ? option.subOption.map((sub: SubOption) => ({
-            name: sub.name || "Default SubOption",
-            price: sub.price ? Number(sub.price) : 0
-          }))
-          : []
+              name: sub.name || "Default SubOption",
+              price: sub.price ? Number(sub.price) : 0,
+            }))
+          : [],
       };
     });
-  }
+  };
 
   function formatToResponse(options: any[]): Option[] {
     return options.map((option, index) => ({
@@ -233,10 +215,9 @@ const ShopMenuComponent = () => {
       numberMinMax: [option.minChoose, option.maxChoose],
       subOption: option.optionItem?.map((item: any) => ({
         name: item.name,
-        price: item.price.toString()
-      }))
+        price: item.price.toString(),
+      })),
     }));
-
   }
 
   const confirmActionHandler = () => {
@@ -249,7 +230,7 @@ const ShopMenuComponent = () => {
           price: price,
           description: description,
           status: currentMenu.status,
-          option: formatToRequest(options)
+          option: formatToRequest(options),
         };
         console.log("payload ", payload);
         console.log("payload ooo ", payload.option[0].optionItems);
@@ -260,7 +241,7 @@ const ShopMenuComponent = () => {
           picture: image || "",
           price: price || 0,
           description: description || "",
-          option: formatToRequest(options) || []
+          option: formatToRequest(options) || [],
         };
         console.log("payload ", payload);
         createMenu(payload);
@@ -310,7 +291,6 @@ const ShopMenuComponent = () => {
                   style={styles.menuImage}
                 />
               )}
-
 
               <TouchableOpacity
                 style={[
