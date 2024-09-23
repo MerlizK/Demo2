@@ -96,8 +96,6 @@ const ShopMenuComponent = () => {
     try {
       const token = await AsyncStorage.getItem("authToken");
       await axios.post(`${APIURL}shop/create-menu`, payload, HeadersToken(token));
-
-
     } catch (error) {
       console.error("Error fetching menu:", error);
     }
@@ -109,11 +107,11 @@ const ShopMenuComponent = () => {
     price: number;
     description?: string;
     status: boolean;
+    option: Option;
   }) => {
     try {
       const token = await AsyncStorage.getItem("authToken");
       await axios.patch(`${APIURL}shop/edit-menu`, payload, HeadersToken(token));
-
       fetchMenuData();
     } catch (error) {
       console.error("Error fetching menu:", error);
@@ -157,16 +155,15 @@ const ShopMenuComponent = () => {
     console.log("Save menu data", data);
     console.log("Save menu menu", menus);
   };
-
   const openEditMenuModal = async (menu: MenuItem) => {
-    setIsOption(false);
     try {
       const token = await AsyncStorage.getItem("authToken");
-
       const response = await axios.get(`${APIURL}shop/menu/info`, {
         params: { menuId: menu.menuId },
         ...HeadersToken(token),
       });
+
+      console.log("Response data:", response.data);
 
       setCurrentMenu(menu);
       setPrice(menu.price || 0);
@@ -174,12 +171,11 @@ const ShopMenuComponent = () => {
       setImage(menu.picture || null);
       setDescription(menu.description || "");
       setIsAddMenuVisible(true);
-      // console.log(formatToResponse(response.data.option));
-      console.log(response.data.option);
     } catch (error) {
       console.error("Error fetching option:", error);
     }
   };
+
 
   const handleSave = () => {
     setConfirmAction("save");
@@ -220,16 +216,19 @@ const ShopMenuComponent = () => {
     });
   };
 
+
   function formatToResponse(options: any[]): Option[] {
     return options.map((option, index) => ({
       name: option.name,
       optionId: index.toString(),
-      require: option.mustChoose,
-      numberMinMax: [option.minChoose, option.maxChoose],
-      subOption: option.optionItem?.map((item: any) => ({
-        name: item.name,
-        price: item.price.toString(),
-      })),
+      require: option.mustChoose || false,
+      numberMinMax: [option.minChoose || 0, option.maxChoose || 0],
+      subOption: Array.isArray(option.optionItem)
+        ? option.optionItem.map((item: any) => ({
+          name: item.name || "Default Name",
+          price: item.price ? item.price.toString() : "0",
+        }))
+        : [],
     }));
   }
 
@@ -246,7 +245,6 @@ const ShopMenuComponent = () => {
           option: formatToRequest(options),
         };
         console.log("payload ", payload);
-        console.log("payload ooo ", payload.option[0].optionItems);
         editMenu(payload);
       } else {
         const payload = {
