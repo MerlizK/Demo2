@@ -6,9 +6,10 @@ const useShopStore = create((set) => ({
   shopData: null,
   loading: false,
   error: null,
+  token: null,
 
   fetchShopData: async (token) => {
-    set({ loading: true, error: null });
+    set((state) => ({ loading: true, error: null }));
     try {
       const response = await axios.get(`${APIURL}shop/info`, {
         headers: {
@@ -20,6 +21,10 @@ const useShopStore = create((set) => ({
       console.error("Error fetching shop data:", error);
       set({ error: "Error fetching shop data", loading: false });
     }
+  },
+
+  setToken: (newToken) => {
+    set({ token: newToken });
   },
 }));
 

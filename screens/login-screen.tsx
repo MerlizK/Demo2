@@ -9,11 +9,13 @@ import {
   Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Add AsyncStorage import
 import AppLogo from "../assets/icons/app-logo.svg";
 import ForgotPasswordModal from "../components/forgot-modal";
 import LoadingScreen from "../components/loading";
 import axios from "axios";
 import { APIURL } from "../Constants";
+import useShopStore from "../ShopStore";
 
 const LoginScreen = () => {
   const [username, setUsername] = useState("");
@@ -21,26 +23,37 @@ const LoginScreen = () => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
+  const { setToken } = useShopStore();
+
   const handleLogin = async () => {
+    setIsLoading(true);
     try {
       const requestBody = {
-        username: username,
-        password: password,
+        username,
+        password,
       };
       const response = await axios.post(`${APIURL}shop/login`, requestBody, {
         headers: {
           "Content-Type": "application/json",
         },
       });
+
       if (response.status === 201) {
         const { token } = response.data;
-        navigation.navigate("HomeTabs", { token });
+
+        await AsyncStorage.setItem("authToken", token);
+
+        setToken(token);
+
+        navigation.navigate("Home" as never);
       } else {
         Alert.alert("Login Failed", "Invalid username or password");
       }
     } catch (error) {
       console.error("Error during login:", error);
       Alert.alert("Login Error", "An error occurred during login");
+    } finally {
+      setIsLoading(false);
     }
   };
 

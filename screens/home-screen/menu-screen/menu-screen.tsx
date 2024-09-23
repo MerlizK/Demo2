@@ -12,8 +12,10 @@ import {
 import axios from "axios";
 import MenuModal from "./menu-modal";
 import Entypo from "@expo/vector-icons/Entypo";
-import { HeadersToken, APIURL } from "../../../Constants";
+import { APIURL } from "../../../Constants";
 import useShopStore from "../../../ShopStore";
+import { HeadersToken } from "../../../Utils";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Option {
   name: string;
@@ -39,7 +41,7 @@ interface MenuItem {
   shopId?: number;
 }
 
-const ShopMenuComponent = (token: String) => {
+const ShopMenuComponent = () => {
   const [data, setData] = useState<{ isOpen: boolean; data: MenuItem[] }>({
     isOpen: true,
     data: [],
@@ -63,13 +65,16 @@ const ShopMenuComponent = (token: String) => {
 
   const { shopData } = useShopStore();
 
+
   useEffect(() => {
     setShopName(shopData.shopName);
   }, [shopData]);
 
   const fetchMenuData = async () => {
     try {
-      const response = await axios.get(`${APIURL}shop/menu`, HeadersToken);
+      const token = await AsyncStorage.getItem("authToken");
+      console.log(`${APIURL}shop/menu`, HeadersToken(token))
+      const response = await axios.get(`${APIURL}shop/menu`, HeadersToken(token));
       setData(response.data as any);
       setMenus(response.data as unknown as MenuItem[]);
     } catch (error) {
@@ -90,7 +95,10 @@ const ShopMenuComponent = (token: String) => {
     description: string;
   }) => {
     try {
-      await axios.post(`${APIURL}shop/create-menu`, payload, HeadersToken);
+      const token = await AsyncStorage.getItem("authToken");
+      await axios.post(`${APIURL}shop/create-menu`, payload, HeadersToken(token));
+
+
     } catch (error) {
       console.error("Error fetching menu:", error);
     }
@@ -104,7 +112,9 @@ const ShopMenuComponent = (token: String) => {
     status: boolean;
   }) => {
     try {
-      await axios.post(`${APIURL}shop/edit-menu`, payload, HeadersToken);
+      const token = await AsyncStorage.getItem("authToken");
+      await axios.post(`${APIURL}shop/edit-menu`, payload, HeadersToken(token));
+
       fetchMenuData();
     } catch (error) {
       console.error("Error fetching menu:", error);
@@ -112,9 +122,11 @@ const ShopMenuComponent = (token: String) => {
   };
   const deleteMenu = async (menuId: number) => {
     try {
+      const token = await AsyncStorage.getItem("authToken");
+
       const response = await axios.delete(`${APIURL}shop/delete-menu`, {
         params: { menuId },
-        ...HeadersToken,
+        ...HeadersToken(token),
       });
       console.log("Menu deleted successfully:", response.data);
     } catch (error) {
@@ -150,9 +162,11 @@ const ShopMenuComponent = (token: String) => {
   const openEditMenuModal = async (menu: MenuItem) => {
     setIsOption(false);
     try {
+      const token = await AsyncStorage.getItem("authToken");
+
       const response = await axios.get(`${APIURL}shop/menu/info`, {
         params: { menuId: menu.menuId },
-        ...HeadersToken,
+        ...HeadersToken(token),
       });
 
       setCurrentMenu(menu);
@@ -199,9 +213,9 @@ const ShopMenuComponent = (token: String) => {
         minChoose: minChoose,
         optionItems: Array.isArray(option.subOption)
           ? option.subOption.map((sub: SubOption) => ({
-              name: sub.name || "Default SubOption",
-              price: sub.price ? Number(sub.price) : 0,
-            }))
+            name: sub.name || "Default SubOption",
+            price: sub.price ? Number(sub.price) : 0,
+          }))
           : [],
       };
     });

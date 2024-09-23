@@ -7,13 +7,16 @@ import {
   Image,
   TouchableOpacity,
   Alert,
+  ScrollView
 } from "react-native";
 import Header from "../../../components/header";
-import { ScrollView } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
 import { launchImageLibrary } from "react-native-image-picker";
 import axios from "axios";
-import { APIURL } from "../../../Constants"; // Ensure you have your API URL defined
+import { APIURL } from "../../../Constants";
+import useShopStore from "../../../ShopStore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { HeadersToken } from "../../../Utils";
 
 type ProfileData = {
   username: string;
@@ -22,7 +25,7 @@ type ProfileData = {
   phoneNumber: string;
   canteen: string;
   shopNumber: string;
-  profileImage: string; // Base64 encoded image string
+  profileImage: string;
 };
 
 const ProfileScreen = () => {
@@ -42,7 +45,9 @@ const ProfileScreen = () => {
   useEffect(() => {
     const fetchShopInfo = async () => {
       try {
-        const response = await axios.get(`${APIURL}/shop/info`);
+        const token = await AsyncStorage.getItem("authToken");
+        console.log(token)
+        const response = await axios.get(`${APIURL}/shop/info`, HeadersToken(token));
         const shopData = response.data;
         setData({
           username: shopData.username,
@@ -115,7 +120,8 @@ const ProfileScreen = () => {
     };
 
     try {
-      const response = await axios.post(`${APIURL}/shop/update-info`, payload);
+      const token = await AsyncStorage.getItem("authToken");
+      const response = await axios.patch(`${APIURL}/shop/update-info`, payload, HeadersToken(token));
       if (response.status === 200) {
         Alert.alert("Success", "Shop information updated successfully");
         setIsEditing(false);
