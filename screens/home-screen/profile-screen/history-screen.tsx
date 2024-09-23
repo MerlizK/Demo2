@@ -12,6 +12,8 @@ import Header from "../../../components/header";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import axios from "axios"; // Make sure to install axios if not already installed
 import { APIURL } from "../../../Constants";
+import { HeadersToken } from "../../../Utils";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const HistoryScreen = () => {
   const navigation = useNavigation();
@@ -33,10 +35,11 @@ const HistoryScreen = () => {
       setLoading(true);
       setError(null);
       try {
+        const token = await AsyncStorage.getItem("authToken");
         const formattedDate = date.toISOString().split("T")[0];
-        const response = await axios.post(`${APIURL}/shop/order/history`, {
-          params: { date: formattedDate },
-        });
+        const response = await axios.post(`${APIURL}shop/order/history`, {
+          params: { date: formattedDate }
+        }, HeadersToken(token));
         setOrders(response.data.orders || []);
       } catch (err) {
         setError("Failed to load orders");
@@ -57,7 +60,7 @@ const HistoryScreen = () => {
       <Header
         title="ประวัติการทำอาหาร"
         showBackButton={true}
-        onBackPress={() => navigation.navigate("HomeTabs", { token })}
+        onBackPress={() => navigation.navigate("Home" as never)}
       />
       <View style={styles.container}>
         <View style={{ alignItems: "center" }}>

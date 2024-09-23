@@ -73,7 +73,6 @@ const ShopMenuComponent = () => {
   const fetchMenuData = async () => {
     try {
       const token = await AsyncStorage.getItem("authToken");
-      console.log(`${APIURL}shop/menu`, HeadersToken(token))
       const response = await axios.get(`${APIURL}shop/menu`, HeadersToken(token));
       setData(response.data as any);
       setMenus(response.data as unknown as MenuItem[]);
@@ -113,7 +112,7 @@ const ShopMenuComponent = () => {
   }) => {
     try {
       const token = await AsyncStorage.getItem("authToken");
-      await axios.post(`${APIURL}shop/edit-menu`, payload, HeadersToken(token));
+      await axios.patch(`${APIURL}shop/edit-menu`, payload, HeadersToken(token));
 
       fetchMenuData();
     } catch (error) {

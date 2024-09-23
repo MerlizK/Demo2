@@ -14,7 +14,6 @@ import { useNavigation } from "@react-navigation/native";
 import { launchImageLibrary } from "react-native-image-picker";
 import axios from "axios";
 import { APIURL } from "../../../Constants";
-import useShopStore from "../../../ShopStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { HeadersToken } from "../../../Utils";
 
@@ -46,8 +45,8 @@ const ProfileScreen = () => {
     const fetchShopInfo = async () => {
       try {
         const token = await AsyncStorage.getItem("authToken");
-        console.log(token)
-        const response = await axios.get(`${APIURL}/shop/info`, HeadersToken(token));
+
+        const response = await axios.get(`${APIURL}shop/info`, HeadersToken(token));
         const shopData = response.data;
         setData({
           username: shopData.username,
@@ -121,7 +120,7 @@ const ProfileScreen = () => {
 
     try {
       const token = await AsyncStorage.getItem("authToken");
-      const response = await axios.patch(`${APIURL}/shop/update-info`, payload, HeadersToken(token));
+      const response = await axios.patch(`${APIURL}shop/update-info`, payload, HeadersToken(token));
       if (response.status === 200) {
         Alert.alert("Success", "Shop information updated successfully");
         setIsEditing(false);
