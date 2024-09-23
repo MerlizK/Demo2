@@ -34,12 +34,12 @@ const RegisterScreen = () => {
     try {
       const payload = {
         ...sampleRes,
-        profilePicture: base64Image, // Add the Base64 encoded image to the payload
+        profilePicture: base64Image,
       };
       const response = await axios.post(`${APIURL}shop/create-shop`, payload);
       if (response.status === 201) {
         const { token } = response.data;
-        navigation.navigate("HomeTabs", { token });
+        navigation.navigate("Home" as never);
       } else {
         Alert.alert("Login Failed", "Invalid username or password");
       }
