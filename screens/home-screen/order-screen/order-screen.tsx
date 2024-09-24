@@ -11,8 +11,7 @@ import {
 import Entypo from "@expo/vector-icons/Entypo";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const APIURL = "https://your-api-url.com/"; // Replace with actual API URL
+import { APIURL } from "../../../Constants";
 
 type MenuItem = {
   orderItemId: number;
@@ -38,7 +37,8 @@ type OrderItemProps = {
   price?: number;
   options?: string;
   comment?: string;
-  onDelete: (orderNumber: string) => void;
+  orderItemId: number;
+  fetchMenuData: () => Promise<void>;
 };
 
 const OrderItem: React.FC<OrderItemProps> = ({
@@ -48,14 +48,27 @@ const OrderItem: React.FC<OrderItemProps> = ({
   price,
   options,
   comment,
-  onDelete,
+  orderItemId,
+  fetchMenuData,
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const handleDelete = () => {
-    onDelete(orderNumber);
-    setIsModalVisible(false);
+  const updateItemStatus = async (orderItemId: number) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      await axios.patch(
+        `${APIURL}shop/order/update-status`,
+        { orderItemId },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setIsModalVisible(false);
+      await fetchMenuData(); // Fetch the menu data again after updating status
+    } catch (error) {
+      console.error("Error updating shop status:", error);
+    }
   };
 
   return (
@@ -103,7 +116,7 @@ const OrderItem: React.FC<OrderItemProps> = ({
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.confirmButton}
-                onPress={handleDelete}
+                onPress={() => updateItemStatus(orderItemId)}
               >
                 <Text style={styles.buttonText}>ยืนยัน</Text>
               </TouchableOpacity>
@@ -119,7 +132,6 @@ const OrderList = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [orders, setOrders] = useState<MenuItem[]>([]);
 
-  // Function to fetch menu data
   const fetchMenuData = async () => {
     try {
       const token = await AsyncStorage.getItem("authToken");
@@ -132,16 +144,24 @@ const OrderList = () => {
     }
   };
 
-  // Fetch data on component mount
   useEffect(() => {
     fetchMenuData();
   }, []);
 
-  const handleDeleteOrder = (orderNumber: string) => {
-    // Simulate order deletion
-    setOrders(
-      orders.filter((order) => order.orderItemId.toString() !== orderNumber)
-    );
+  const updateShopStatus = async (status: boolean) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      await axios.patch(
+        `${APIURL}shop/update-status`,
+        { status },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setIsOpen(status);
+    } catch (error) {
+      console.error("Error updating shop status:", error);
+    }
   };
 
   return (
@@ -157,8 +177,9 @@ const OrderList = () => {
                 options={order.specialInstructions}
                 comment={order.orderItemStatus}
                 foodPrice={order.totalPrice}
-                price={order.totalPrice} // Assuming price and foodPrice are the same
-                onDelete={handleDeleteOrder}
+                price={order.totalPrice}
+                orderItemId={order.orderItemId}
+                fetchMenuData={fetchMenuData}
               />
             ))
           ) : (
@@ -182,7 +203,7 @@ const OrderList = () => {
             styles.statusButton,
             isOpen ? styles.openButton : styles.closedButton,
           ]}
-          onPress={() => setIsOpen(!isOpen)}
+          onPress={() => updateShopStatus(!isOpen)}
         >
           <Text style={styles.buttonText}>
             {isOpen ? "ร้านเปิด" : "ร้านปิด"}
@@ -192,35 +213,72 @@ const OrderList = () => {
     </>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 32,
     width: "100%",
-    gap: 20,
+    flex: 1,
+    paddingHorizontal: 32,
     backgroundColor: "#fff",
+    marginVertical: 16,
+  },
+  orderContainer: {
+    marginBottom: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    borderRadius: 8,
+  },
+  orderHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  orderText: {
+    color: "#000",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginLeft: 8,
+  },
+  priceContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1, // Takes available space
+    justifyContent: "space-between", // Distribute space between items
+  },
+  priceText: {
+    marginRight: 8,
+  },
+  orderDetails: {
+    gap: 8,
+    marginTop: 8,
+  },
+  menuText: {
+    color: "#000",
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  subText: {
+    fontSize: 12,
+    color: "#757575",
+    marginBottom: 2,
+  },
+  button: {
+    alignSelf: "flex-end",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: "#333",
+    borderRadius: 8,
+    alignItems: "center",
   },
   buttonText: {
     color: "#fff",
     fontWeight: "bold",
   },
-  statusButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  description: { color: "#000", fontSize: 16 },
-  shopName: {
-    color: "#000",
-    marginTop: 70,
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
   statusRow: {
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: 16,
   },
   statusText: {
     color: "#000",
@@ -239,75 +297,53 @@ const styles = StyleSheet.create({
   closedButton: {
     backgroundColor: "red",
   },
-  menuList: {
-    flex: 1,
-    marginBottom: 20,
-  },
-  menuItem: {
-    flexDirection: "row",
+  emptyContainer: {
+    height: "100%",
+    justifyContent: "center",
     alignItems: "center",
-    marginBottom: 15,
   },
-  menuName: {
-    color: "#000",
-    fontSize: 18,
-  },
-  menuPrice: {
-    color: "#000",
-    fontSize: 16,
-  },
-  menuImage: {
-    width: 60,
-    height: 40,
-    borderRadius: 4,
-    flex: 1,
-  },
-  statusAvailable: {
-    backgroundColor: "green",
-  },
-  statusSoldOut: {
-    backgroundColor: "red",
-  },
-  settingsButton: {
-    marginLeft: 8,
-  },
-  addButton: {
-    backgroundColor: "#000",
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    alignItems: "center",
-    marginBottom: 20,
-    maxWidth: 220,
-  },
-  addButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  confirmModalContent: {
+  modalBackground: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff",
-    padding: 20,
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Darker background
   },
-  confirmButtonRow: {
+  modalContent: {
+    width: Dimensions.get("window").width * 0.8, // 80% of screen width
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 16,
+  },
+  modalButtons: {
     flexDirection: "row",
-    marginTop: 20,
   },
   cancelButton: {
-    backgroundColor: "#f44336",
+    backgroundColor: "red",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     borderRadius: 8,
-    padding: 10,
-    margin: 10,
+    marginRight: 8,
   },
   confirmButton: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: "green",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     borderRadius: 8,
-    padding: 10,
-    margin: 10,
+  },
+  expandCollapseText: {
+    fontWeight: "bold",
+    width: 40,
+    textAlign: "right", // Align text to the right
+  },
+  spacer: {
+    flex: 1, // Push
   },
 });
 
-export default ShopMenuComponent;
+export default OrderList;
