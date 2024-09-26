@@ -12,11 +12,12 @@ import TabTime from "./TabShopSettingTime";
 import MenuScreen from "./menu-screen/menu-screen";
 import useShopStore from "../../ShopStore";
 import ProfileScreen from "./profile-screen/profile-screen";
+import SpecialTimeSetting from "./time-screen/time-screen";
+import OrderList from "./order-screen/order-screen";
 
 const Tab = createMaterialBottomTabNavigator();
 
 function HomeTabs() {
-
   const { fetchShopData } = useShopStore();
 
   useEffect(() => {
@@ -41,7 +42,7 @@ function HomeTabs() {
     >
       <Tab.Screen
         name="TabOrder"
-        component={TabOrder}
+        component={OrderList}
         options={{
           tabBarLabel: "Order",
           tabBarIcon: ({ color }) => (
@@ -61,7 +62,7 @@ function HomeTabs() {
       />
       <Tab.Screen
         name="TabTime"
-        component={TabTime}
+        component={SpecialTimeSetting}
         options={{
           tabBarLabel: "Time",
           tabBarIcon: ({ color }) => (

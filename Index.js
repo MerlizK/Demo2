@@ -13,6 +13,8 @@ import EditInfo from "./screens/home-screen/ShopEditInfo";
 import History from "./screens/home-screen/ShopOrderHistory";
 import HistoryScreen from "./screens/home-screen/profile-screen/history-screen";
 import ProfileScreen from "./screens/home-screen/profile-screen/profile-screen";
+import OrderList from "./screens/home-screen/order-screen/order-screen";
+import SpecialTimeSetting from "./screens/home-screen/time-screen/time-screen";
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +27,8 @@ function Index() {
         <Stack.Screen name="Home" component={HomeTabs} />
         <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
         <Stack.Screen name="HistoryScreen" component={HistoryScreen} />
+        <Stack.Screen name="OrderScreen" component={OrderList} />
+        <Stack.Screen name="TimeScreen" component={SpecialTimeSetting} />
         <Stack.Screen name="CreateMenu" component={CreateMenu} />
         <Stack.Screen name="EditMenu" component={EditMenu} />
         <Stack.Screen name="AddOption" component={AddOption} />

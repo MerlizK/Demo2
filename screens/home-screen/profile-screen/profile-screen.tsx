@@ -7,7 +7,7 @@ import {
   Image,
   TouchableOpacity,
   Alert,
-  ScrollView
+  ScrollView,
 } from "react-native";
 import Header from "../../../components/header";
 import { useNavigation } from "@react-navigation/native";
@@ -46,7 +46,10 @@ const ProfileScreen = () => {
       try {
         const token = await AsyncStorage.getItem("authToken");
 
-        const response = await axios.get(`${APIURL}shop/info`, HeadersToken(token));
+        const response = await axios.get(
+          `${APIURL}shop/info`,
+          HeadersToken(token)
+        );
         const shopData = response.data;
         setData({
           username: shopData.username,
@@ -120,7 +123,11 @@ const ProfileScreen = () => {
 
     try {
       const token = await AsyncStorage.getItem("authToken");
-      const response = await axios.patch(`${APIURL}shop/update-info`, payload, HeadersToken(token));
+      const response = await axios.patch(
+        `${APIURL}shop/update-info`,
+        payload,
+        HeadersToken(token)
+      );
       if (response.status === 200) {
         Alert.alert("Success", "Shop information updated successfully");
         setIsEditing(false);
