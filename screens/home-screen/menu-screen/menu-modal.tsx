@@ -20,7 +20,7 @@ interface Option {
   name: string;
   optionId: string;
   require: boolean;
-  numberMinMax: [number, number];
+  numberMinMax: number[];
   subOption: SubOption[];
 }
 
@@ -72,7 +72,7 @@ const MenuModal: React.FC<MenuModalProps> = ({
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        quality: 1,
+        quality: 0.1,
       });
       if (!result.canceled) {
         const selectedImageUri = result.assets[0].uri || null;
@@ -117,6 +117,7 @@ const MenuModal: React.FC<MenuModalProps> = ({
     setOptions(
       options.filter((option: Option) => option.optionId !== currentOption)
     );
+    console.log("delete option ", options);
     setIsOption(false);
   };
 
@@ -133,13 +134,18 @@ const MenuModal: React.FC<MenuModalProps> = ({
     );
 
     if (optionIndex > -1) {
+      console.log("Case 1");
       const updatedOptions = [...options];
+      console.log("updatedOptions ",updatedOptions);
       updatedOptions[optionIndex] = newOption;
       setOptions(updatedOptions);
     } else {
+      console.log("Case 2")
       setOptions([...options, newOption]);
+      console.log("saveOption Options",options);
     }
-
+    console.log("saveOption newOption",newOption);
+    console.log("saveOption Options",options);
     setIsOption(false);
   };
 
@@ -212,7 +218,7 @@ const MenuModal: React.FC<MenuModalProps> = ({
                       <TouchableOpacity
                         onPress={() => {
                           setOptionName(item.name);
-                          console.log('item ', item);
+                          console.log('edit item options', item);
                           setCurrentOption(item.optionId);
                           setMinMax(item.numberMinMax);
                           setIsOption(true);

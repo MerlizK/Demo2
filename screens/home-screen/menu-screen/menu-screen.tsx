@@ -56,7 +56,7 @@ const ShopMenuComponent = () => {
   );
   const [price, setPrice] = useState<number>(0);
   const [options, setOptions] = useState<Option[]>([]);
-  const [image, setImage] = useState<string | null>(null);
+  const [image, setImage] = useState<string | null>("");
   const [description, setDescription] = useState<string>("");
   const [refreshing, setRefreshing] = useState(false);
   const [shopName, setShopName] = useState('');
@@ -66,6 +66,8 @@ const ShopMenuComponent = () => {
   useEffect(() => {
     setShopName(shopData.shopName)
   }, [shopData]);
+
+  useEffect(() => {fetchMenuData();},[]);
 
   const fetchMenuData = async () => {
     try {
@@ -98,6 +100,7 @@ const ShopMenuComponent = () => {
         payload,
         HeadersToken
       );
+      fetchMenuData();
     } catch (error) {
       console.error("Error fetching menu:", error);
     }
@@ -111,16 +114,42 @@ const ShopMenuComponent = () => {
     status: boolean;
   }) => {
     try {
-      await axios.post(
+      await axios.patch(
         `${APIURL}shop/edit-menu`,
         payload,
         HeadersToken
       );
       fetchMenuData();
+      console.log("editMenu payload post = ",payload);
     } catch (error) {
-      console.error("Error fetching menu:", error);
+      console.log("editMenu payload post error = ",payload);
+      console.error("Error fetching menu on EditMenu:", error);
     }
   };
+
+  const updateStatusMenu = async (payload: {
+    menuId: number;
+    name: string;
+    picture?: string;
+    price: number;
+    description?: string;
+    status: boolean;
+  }) => {
+    try {
+      await axios.patch(
+        `${APIURL}shop/menu/update-status`,
+        payload,
+        HeadersToken
+      );
+      fetchMenuData();
+      console.log("updateStatusMenu payload patch = ",payload);
+    } catch (error) {
+      console.log("updateStatusMenu payload patch error = ",payload);
+      console.error("Error fetching menu on EditMenu:", error);
+    }
+  };
+
+
   const deleteMenu = async (menuId: number) => {
     try {
       const response = await axios.delete(
@@ -130,6 +159,7 @@ const ShopMenuComponent = () => {
           ...HeadersToken,
         }
       );
+      fetchMenuData();
       console.log("Menu deleted successfully:", response.data);
     } catch (error) {
       console.error("Error deleting menu:", error);
@@ -140,11 +170,16 @@ const ShopMenuComponent = () => {
   const toggleStatus = (menuId: number): void => {
     const menu = menus.find((menu) => menu.menuId === menuId);
 
+    console.log("MenuId = ",menuId)
+    console.log("Menu: ",menu)
+
     const payload = {
       ...menu,
       status: !menu.status,
     };
-    editMenu(payload);
+
+    console.log("ToggleStatus payload = ",payload)
+    updateStatusMenu(payload);
   };
 
   const openAddMenuModal = () => {
@@ -152,7 +187,7 @@ const ShopMenuComponent = () => {
     setCurrentMenu(null);
     setPrice(0);
     setOptions([]);
-    setImage(null);
+    setImage("");
     setDescription("");
     setIsAddMenuVisible(true);
     console.log(currentMenu);
@@ -176,11 +211,12 @@ const ShopMenuComponent = () => {
       setCurrentMenu(menu);
       setPrice(menu.price || 0);
       setOptions(formatToResponse(response.data.option) || []);
-      setImage(menu.picture || null);
+      setImage(menu.picture || "");
       setDescription(menu.description || "");
       setIsAddMenuVisible(true);
       // console.log(formatToResponse(response.data.option));
-      console.log(response.data.option);
+      console.log("OpenEditMenuModal data ",response.data);
+      console.log("OpenEditMenuModal option ",response.data.option);
     } catch (error) {
       console.error("Error fetching option:", error);
     }
@@ -241,6 +277,7 @@ const ShopMenuComponent = () => {
 
   const confirmActionHandler = () => {
     if (confirmAction === "save") {
+      console.log("confirmActionHandler Save Options ", options);
       if (currentMenu && currentMenu.menuId) {
         const payload = {
           menuId: currentMenu.menuId,
@@ -251,8 +288,8 @@ const ShopMenuComponent = () => {
           status: currentMenu.status,
           option: formatToRequest(options)
         };
-        console.log("payload ", payload);
-        console.log("payload ooo ", payload.option[0].optionItems);
+        console.log("confirmActionHandler editMenu payload ", payload);
+        // console.log("confirmActionHandler editMenu payload optionItems ", payload.option[0].optionItems);
         editMenu(payload);
       } else {
         const payload = {
@@ -262,7 +299,7 @@ const ShopMenuComponent = () => {
           description: description || "",
           option: formatToRequest(options) || []
         };
-        console.log("payload ", payload);
+        console.log("confirmActionHandler createMenu payload ", payload);
         createMenu(payload);
       }
     } else if (confirmAction === "delete") {
@@ -302,7 +339,7 @@ const ShopMenuComponent = () => {
             <View key={menu.menuId} style={styles.menuItem}>
               <View style={{ flexDirection: "column", flex: 1 }}>
                 <Text style={styles.menuName}>{menu.name}</Text>
-                <Text style={styles.menuPrice}>{menu.price}</Text>
+                <Text style={styles.menuPrice}>{menu.price} บาท</Text>
               </View>
               {menu.picture && (
                 <Image
@@ -320,7 +357,7 @@ const ShopMenuComponent = () => {
                 onPress={() => toggleStatus(menu.menuId)}
               >
                 <Text style={styles.statusButtonText}>
-                  {menu.status ? "เหลือ" : "หมด"}
+                  {menu.status ? "ขาย" : "ไม่ขาย"}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -351,9 +388,9 @@ const ShopMenuComponent = () => {
         <TouchableOpacity style={styles.addButton} onPress={openAddMenuModal}>
           <Text style={styles.addButtonText}>เพิ่มเมนู</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.addButton} onPress={handleSaveMenu}>
+        {/* <TouchableOpacity style={styles.addButton} onPress={handleSaveMenu}>
           <Text style={styles.addButtonText}>บันทึกการตั้งค่าเมนู</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       <Modal
@@ -464,14 +501,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   menuPrice: {
-    color: "#000",
+    color: "gray",
     fontSize: 16,
   },
   menuImage: {
     width: 60,
     height: 40,
     borderRadius: 4,
-    flex: 1,
+    marginRight: 20,
+    // flex: 1,
   },
   statusAvailable: {
     backgroundColor: "green",

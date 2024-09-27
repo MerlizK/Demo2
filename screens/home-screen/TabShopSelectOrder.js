@@ -19,8 +19,30 @@ export default function TabOrder() {
 
   return (
     <View style={styles.container}>
+      <SHeader text="รายการออเดอร์" />
+      <View
+        style={{
+          alignSelf: "center",
+          // position: "absolute",
+          // bottom: 50,
+          marginTop: 30,
+          marginBottom: 10,
+          flexDirection: "row",
+        }}
+      >
+        <Text style={{ alignSelf: "center", fontSize: 22, fontWeight: "bold" }}>
+          สถานะร้าน :
+        </Text>
+        <TouchableOpacity
+          onPress={toggleShopAva}
+          style={shopAva ? styles.menuYButton : styles.menuXButton}
+        >
+          <Text style={{ fontSize: 18, color: "white" }}>
+            {shopAva ? "ร้านเปิด" : "ร้านปิด "}
+          </Text>
+        </TouchableOpacity>
+      </View>
       <ScrollView>
-        <SHeader text="รายการออเดอร์" />
         {shopAva ? (
           <View>
             <Order text="1" />
@@ -39,28 +61,8 @@ export default function TabOrder() {
             <Text style={{ color: "gray", fontSize: 30 }}>ยังไม่มีออเดอร์</Text>
           </View>
         )}
+        <View style={{height: 20}}/>
       </ScrollView>
-      <View
-        style={{
-          alignSelf: "center",
-          position: "absolute",
-          bottom: 50,
-          marginBottom: 30,
-          flexDirection: "row",
-        }}
-      >
-        <Text style={{ alignSelf: "center", fontSize: 22, fontWeight: "bold" }}>
-          สถานะร้าน :
-        </Text>
-        <TouchableOpacity
-          onPress={toggleShopAva}
-          style={shopAva ? styles.menuYButton : styles.menuXButton}
-        >
-          <Text style={{ fontSize: 18, color: "white" }}>
-            {shopAva ? "ร้านเปิด" : "ร้านปิด "}
-          </Text>
-        </TouchableOpacity>
-      </View>
       <StatusBar style="auto" />
     </View>
   );

@@ -11,7 +11,7 @@ export default Colors;
 
 export const HeadersToken = {
   headers: {
-    Authorization: `Bearer ${"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJhdXRoMyIsImlhdCI6MTcyNjc0NjMzOSwiZXhwIjoxNzM1Mzg2MzM5fQ.BYqdj2CjAsFLf3bS_HLKdbwsdaiA2dx5n3WSb-9oRYA"}`,
+    Authorization: `Bearer ${"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRoSWQiOiJzaG9wLTYxN2MwNzk2LTllY2EtNGQzOC05NjAxLThiYWRmMDhlNWUwYyIsImlhdCI6MTcyNzM1NjI1NSwiZXhwIjoxNzM1OTk2MjU1fQ.PDb295IytUEzUglxhQPX9t9fT-KvryjVo08eLHjP4A8"}`,
   },
 };
 
