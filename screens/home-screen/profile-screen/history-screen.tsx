@@ -37,9 +37,13 @@ const HistoryScreen = () => {
       try {
         const token = await AsyncStorage.getItem("authToken");
         const formattedDate = date.toISOString().split("T")[0];
-        const response = await axios.post(`${APIURL}shop/order/history`, {
-          params: { date: formattedDate }
-        }, HeadersToken(token));
+        const response = await axios.post(
+          `${APIURL}shop/order/history`,
+          {
+            params: { date: formattedDate },
+          },
+          HeadersToken(token)
+        );
         setOrders(response.data.orders || []);
       } catch (err) {
         setError("Failed to load orders");
@@ -116,7 +120,7 @@ const HistoryScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  overallContainer: { marginTop: -40, flex: 1, height: "100%" },
+  overallContainer: { flex: 1, height: "100%" },
   container: { flex: 1, padding: 16, backgroundColor: "#fff" },
   datePickerButton: {
     marginBottom: 20,

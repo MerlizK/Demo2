@@ -63,11 +63,11 @@ const ShopMenuComponent = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [shopName, setShopName] = useState("");
 
-  const { shopData } = useShopStore();
+  const { shopData, fetchShopData } = useShopStore();
 
   useEffect(() => {
-    setShopName(shopData.shopName);
-  }, [shopData]);
+    fetchMenuData();
+  }, []);
 
   const fetchMenuData = async () => {
     try {
@@ -78,6 +78,10 @@ const ShopMenuComponent = () => {
       );
       setData(response.data as any);
       setMenus(response.data as unknown as MenuItem[]);
+      fetchShopData(token);
+      setShopName(shopData.shopName);
+      console.log("shopData.status", shopData.status);
+      setIsOpen(shopData.status);
     } catch (error) {
       console.error("Error fetching menu:", error);
     }
@@ -379,9 +383,6 @@ const ShopMenuComponent = () => {
       >
         <TouchableOpacity style={styles.addButton} onPress={openAddMenuModal}>
           <Text style={styles.addButtonText}>เพิ่มเมนู</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.addButton} onPress={handleSaveMenu}>
-          <Text style={styles.addButtonText}>บันทึกการตั้งค่าเมนู</Text>
         </TouchableOpacity>
       </View>
 

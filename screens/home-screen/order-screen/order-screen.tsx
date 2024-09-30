@@ -7,65 +7,81 @@ import {
   ScrollView,
   Modal,
   Dimensions,
+  RefreshControl,
 } from "react-native";
+import Header from "../../../components/header";
 import Entypo from "@expo/vector-icons/Entypo";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { APIURL } from "../../../Constants";
+import useShopStore from "../../../ShopStore";
 
-type MenuItem = {
+type OrderItemExtraType = {
+  OrderItemExtraId: number;
+  optionItem: {
+    optionItemId: number;
+    name: string;
+    price: number;
+  };
+};
+
+type OrderItemType = {
   orderItemId: number;
   quantity: number;
   totalPrice: number;
   specialInstructions: string;
-  shopId: number;
-  orderItemStatus: string;
-  orderItemDate: string;
-  completedDate: string;
-  menuId: number;
+  menu: {
+    name: string;
+    price: number;
+  };
+  orderItemExtra?: OrderItemExtraType[];
+};
+
+type OrderType = {
   orderId: number;
-  orderItemExtras: {
-    optionItemId: number;
-    selected: boolean;
-  }[];
+  orderDate: string;
+  orderStatus: string;
+  orderItem: OrderItemType[];
 };
 
 type OrderItemProps = {
   orderNumber: string;
-  menuNumber?: string;
-  foodPrice?: number;
-  price?: number;
-  options?: string;
-  comment?: string;
-  orderItemId: number;
+  menu: string;
+  foodPrice: number;
+  totalPrice: number;
+  options: string;
+  comment: string;
+  extras: string;
+  orderId: number;
   fetchMenuData: () => Promise<void>;
 };
 
 const OrderItem: React.FC<OrderItemProps> = ({
   orderNumber,
-  menuNumber,
+  menu,
   foodPrice,
-  price,
+  totalPrice,
   options,
   comment,
-  orderItemId,
+  extras,
+  orderId,
   fetchMenuData,
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const updateItemStatus = async (orderItemId: number) => {
+  const updateItemStatus = async (orderId: number) => {
     try {
       const token = await AsyncStorage.getItem("authToken");
       await axios.patch(
         `${APIURL}shop/order/update-status`,
-        { orderItemId },
+        { orderId },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
       setIsModalVisible(false);
-      await fetchMenuData(); // Fetch the menu data again after updating status
+      await fetchMenuData();
     } catch (error) {
       console.error("Error updating shop status:", error);
     }
@@ -74,11 +90,12 @@ const OrderItem: React.FC<OrderItemProps> = ({
   return (
     <View style={styles.orderContainer}>
       <View style={styles.orderHeader}>
-        <Entypo name="location-pin" size={24} color="black" />
-        <Text style={styles.orderText}>ออเดอร์ที่ {orderNumber} </Text>
-        <Text style={styles.priceText}>ค่าอาหาร {foodPrice} บาท</Text>
+        <View style={styles.orderInfo}>
+          <Entypo name="location-pin" size={24} color="black" />
+          <Text style={styles.orderText}>ออเดอร์ที่ {orderNumber}</Text>
+        </View>
         <View style={styles.priceContainer}>
-          <View style={styles.spacer} />
+          <Text style={styles.priceText}>ค่าอาหาร {foodPrice} บาท</Text>
           <TouchableOpacity onPress={() => setExpanded(!expanded)}>
             {!expanded ? (
               <Entypo name="chevron-small-down" size={28} color="black" />
@@ -90,10 +107,28 @@ const OrderItem: React.FC<OrderItemProps> = ({
       </View>
       {expanded && (
         <View style={styles.orderDetails}>
-          <Text style={styles.menuText}>เมนูที่{menuNumber}</Text>
-          <Text style={styles.subText}>จำนวนที่สั่ง: {options}</Text>
-          <Text style={styles.subText}>comment: {comment}</Text>
-          <Text style={styles.subText}>ราคา: {price} บาท</Text>
+          <View style={styles.orderHeader}>
+            <Text style={styles.menuText}>เมนู:</Text>
+            <Text style={styles.menuText}>{menu}</Text>
+          </View>
+          <View style={styles.orderHeader}>
+            <Text style={styles.menuText}>จำนวน:</Text>
+            <Text style={styles.menuText}>{options}</Text>
+          </View>
+          {extras ? (
+            <View style={styles.orderHeader}>
+              <Text style={styles.menuText}>เพิ่มเติม:</Text>
+              <Text style={styles.menuText}>{extras}</Text>
+            </View>
+          ) : null}
+          <View style={styles.orderHeader}>
+            <Text style={styles.menuText}>comment:</Text>
+            <Text style={styles.menuText}>{comment}</Text>
+          </View>
+          <View style={styles.orderHeader}>
+            <Text style={styles.menuText}>ราคา:</Text>
+            <Text style={styles.menuText}>{totalPrice} บาท</Text>
+          </View>
           <TouchableOpacity
             style={styles.button}
             onPress={() => setIsModalVisible(true)}
@@ -116,7 +151,7 @@ const OrderItem: React.FC<OrderItemProps> = ({
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.confirmButton}
-                onPress={() => updateItemStatus(orderItemId)}
+                onPress={() => updateItemStatus(orderId)}
               >
                 <Text style={styles.buttonText}>ยืนยัน</Text>
               </TouchableOpacity>
@@ -129,8 +164,16 @@ const OrderItem: React.FC<OrderItemProps> = ({
 };
 
 const OrderList = () => {
+  const [orders, setOrders] = useState<OrderType[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const { shopData, fetchShopData } = useShopStore();
   const [isOpen, setIsOpen] = useState(false);
-  const [orders, setOrders] = useState<MenuItem[]>([]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchMenuData();
+    setRefreshing(false);
+  };
 
   const fetchMenuData = async () => {
     try {
@@ -138,7 +181,13 @@ const OrderList = () => {
       const response = await axios.get(`${APIURL}shop/order`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setOrders(response.data as MenuItem[]);
+      setOrders(response.data);
+      fetchShopData(token);
+      if (shopData.status) {
+        setIsOpen(shopData.status);
+      } else {
+        fetchMenuData();
+      }
     } catch (error) {
       console.error("Error fetching menu:", error);
     }
@@ -166,34 +215,57 @@ const OrderList = () => {
 
   return (
     <>
+      <Header title="รายการออเดอร์" showBackButton={false} />
       {isOpen ? (
-        <ScrollView style={styles.container}>
+        <ScrollView
+          style={styles.container}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          }
+        >
           {orders.length > 0 ? (
-            orders.map((order) => (
-              <OrderItem
-                key={order.orderItemId}
-                orderNumber={order.orderItemId.toString()}
-                menuNumber={order.menuId.toString()}
-                options={order.specialInstructions}
-                comment={order.orderItemStatus}
-                foodPrice={order.totalPrice}
-                price={order.totalPrice}
-                orderItemId={order.orderItemId}
-                fetchMenuData={fetchMenuData}
-              />
-            ))
+            orders.map((order) =>
+              order.orderItem.map((item) => (
+                <OrderItem
+                  key={item.orderItemId}
+                  orderNumber={order.orderId.toString()}
+                  menu={item.menu.name}
+                  options={item.quantity.toString()}
+                  comment={item.specialInstructions}
+                  foodPrice={item.menu.price}
+                  totalPrice={item.totalPrice}
+                  extras={
+                    item.orderItemExtra && item.orderItemExtra.length > 0
+                      ? item.orderItemExtra
+                          .map(
+                            (extra) =>
+                              `${extra.optionItem.name} +${extra.optionItem.price} บาท`
+                          )
+                          .join(", ")
+                      : ""
+                  }
+                  orderId={order.orderId}
+                  fetchMenuData={fetchMenuData}
+                />
+              ))
+            )
           ) : (
             <View style={styles.emptyContainer}>
-              <Text style={styles.orderText}>ยังไม่มีออเดอร์</Text>
+              <Text style={styles.emptyText}>ยังไม่มีออเดอร์</Text>
             </View>
           )}
         </ScrollView>
       ) : (
-        <View style={styles.container}>
+        <ScrollView
+          style={styles.container}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          }
+        >
           <View style={styles.emptyContainer}>
-            <Text style={styles.orderText}>ยังไม่มีออเดอร์</Text>
+            <Text style={styles.emptyText}>ยังไม่มีออเดอร์</Text>
           </View>
-        </View>
+        </ScrollView>
       )}
 
       <View style={styles.statusRow}>
@@ -206,13 +278,14 @@ const OrderList = () => {
           onPress={() => updateShopStatus(!isOpen)}
         >
           <Text style={styles.buttonText}>
-            {isOpen ? "ร้านเปิด" : "ร้านปิด"}
+            {isOpen ? "เปิดอยู่" : "ปิดอยู่"}
           </Text>
         </TouchableOpacity>
       </View>
     </>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     width: "100%",
@@ -233,24 +306,39 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
+  orderInfo: {
+    maxWidth: "45%",
+    flexDirection: "row",
+    alignItems: "center",
+  },
   orderText: {
     color: "#000",
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "bold",
     marginLeft: 8,
   },
+  emptyText: {
+    color: "#f0f0f0",
+    fontSize: 32,
+    fontWeight: "300",
+    marginLeft: 8,
+  },
   priceContainer: {
+    backgroundColor: "white",
+    maxWidth: "55%",
     flexDirection: "row",
     alignItems: "center",
-    flex: 1, // Takes available space
-    justifyContent: "space-between", // Distribute space between items
+    flex: 1,
+    justifyContent: "flex-end",
   },
   priceText: {
+    fontSize: 14,
     marginRight: 8,
   },
   orderDetails: {
     gap: 8,
     marginTop: 8,
+    paddingHorizontal: 24,
   },
   menuText: {
     color: "#000",
@@ -265,6 +353,7 @@ const styles = StyleSheet.create({
   },
   button: {
     alignSelf: "flex-end",
+    right: -16,
     paddingVertical: 12,
     paddingHorizontal: 16,
     backgroundColor: "#333",
@@ -277,19 +366,20 @@ const styles = StyleSheet.create({
   },
   statusRow: {
     flexDirection: "row",
+    justifyContent: "center",
     alignItems: "center",
-    marginBottom: 16,
+    paddingHorizontal: 16,
+    marginVertical: 12,
   },
   statusText: {
-    color: "#000",
     fontSize: 16,
     fontWeight: "bold",
+    marginRight: 8,
   },
   statusButton: {
-    marginLeft: 8,
     paddingVertical: 8,
     paddingHorizontal: 16,
-    borderRadius: 24,
+    borderRadius: 4,
   },
   openButton: {
     backgroundColor: "green",
@@ -297,23 +387,17 @@ const styles = StyleSheet.create({
   closedButton: {
     backgroundColor: "red",
   },
-  emptyContainer: {
-    height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-  },
   modalBackground: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Darker background
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
-    width: Dimensions.get("window").width * 0.8, // 80% of screen width
-    backgroundColor: "#fff",
+    width: "80%",
     padding: 16,
+    backgroundColor: "#fff",
     borderRadius: 8,
-    justifyContent: "center",
     alignItems: "center",
   },
   modalText: {
@@ -322,27 +406,27 @@ const styles = StyleSheet.create({
   },
   modalButtons: {
     flexDirection: "row",
-  },
-  cancelButton: {
-    backgroundColor: "red",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginRight: 8,
+    gap: 16,
+    justifyContent: "center",
+    width: "100%",
   },
   confirmButton: {
-    backgroundColor: "green",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    backgroundColor: "#00c853",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
     borderRadius: 8,
   },
-  expandCollapseText: {
-    fontWeight: "bold",
-    width: 40,
-    textAlign: "right", // Align text to the right
+  cancelButton: {
+    backgroundColor: "#f44336",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
   },
-  spacer: {
-    flex: 1, // Push
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: 24,
   },
 });
 

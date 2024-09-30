@@ -144,7 +144,8 @@ const ProfileScreen = () => {
     <>
       <Header
         title={!isEditing ? "ข้อมูลร้าน" : "แก้ไขข้อมูล"}
-        showBackButton={false}
+        showBackButton={isEditing}
+        onBackPress={() => setIsEditing(false)}
       />
       <ScrollView style={styles.container}>
         <View style={styles.iconWrapper}>
@@ -264,15 +265,14 @@ const ProfileScreen = () => {
               <Text style={styles.registerButtonText}>แก้ไขข้อมูล</Text>
             </TouchableOpacity>
           ) : (
-            <View style={{ gap: 8, flexDirection: "row-reverse" }}>
+            <View style={{ justifyContent: "center" }}>
               <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={() => setIsEditing(false)}
+                style={styles.registerButton}
+                onPress={handleSave}
               >
-                <Text style={styles.registerButtonText}>ยกเลิก</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-                <Text style={styles.registerButtonText}>บันทึก</Text>
+                <Text style={styles.registerButtonText}>
+                  ยืนยันการแก้ไขข้อมูล
+                </Text>
               </TouchableOpacity>
             </View>
           )}
@@ -300,12 +300,13 @@ const styles = StyleSheet.create({
   },
   iconWrapper: {
     alignItems: "center",
-    marginBottom: 20,
+    marginTop: 20,
+    marginBottom: 40,
   },
   userIcon: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 150,
+    height: 150,
+    borderRadius: 100,
     backgroundColor: "#EAEAF5",
   },
   formWrapper: {
@@ -336,22 +337,6 @@ const styles = StyleSheet.create({
   registerButton: {
     maxWidth: 220,
     backgroundColor: "#000",
-    padding: 15,
-    borderRadius: 5,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  saveButton: {
-    maxWidth: 163,
-    backgroundColor: "green",
-    padding: 15,
-    borderRadius: 5,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  cancelButton: {
-    maxWidth: 163,
-    backgroundColor: "red",
     padding: 15,
     borderRadius: 5,
     alignItems: "center",

@@ -7,9 +7,9 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
+  ScrollView,
 } from "react-native";
 import { Calendar } from "react-native-calendars";
-import { ScrollView } from "react-native-gesture-handler";
 import { APIURL } from "../../../Constants";
 
 const SpecialTimeSetting = () => {
