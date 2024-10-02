@@ -212,7 +212,7 @@ const ShopMenuComponent = () => {
       setCurrentMenu(menu);
       setPrice(menu.price || 0);
       setOptions(formatToResponse(response.data.option) || []);
-      setImage(menu.picture || null);
+      setImage(menu.picture || "");
       setDescription(menu.description || "");
       setIsAddMenuVisible(true);
     } catch (error) {

@@ -136,7 +136,7 @@ const HistoryScreen = () => {
       setError(null);
       try {
         const token = await AsyncStorage.getItem("authToken");
-        const formattedDate = date.toISOString();
+        const formattedDate = date.toISOString().split("T")[0];
         const mockResponse = [
           {
             orderId: 0,
