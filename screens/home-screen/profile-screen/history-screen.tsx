@@ -10,10 +10,110 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import Header from "../../../components/header";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import axios from "axios"; // Make sure to install axios if not already installed
+import Entypo from "@expo/vector-icons/Entypo";
+import axios from "axios";
 import { APIURL } from "../../../Constants";
 import { HeadersToken } from "../../../Utils";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+type OrderItemExtraType = {
+  OrderItemExtraId: number;
+  optionItem: {
+    optionItemId: number;
+    name: string;
+    price: number;
+  };
+};
+
+type OrderItemType = {
+  orderItemId: number;
+  quantity: number;
+  totalPrice: number;
+  specialInstructions: string;
+  menu: {
+    name: string;
+    price: number;
+  };
+  orderItemExtra?: OrderItemExtraType[];
+};
+
+type OrderItemProps = {
+  orderNumber: string;
+  orderItems: OrderItemType[];
+  orderId: number;
+};
+
+const OrderItem: React.FC<OrderItemProps> = ({
+  orderNumber,
+  orderItems,
+  orderId,
+}) => {
+  const [expanded, setExpanded] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  return (
+    <View style={styles.orderContainer}>
+      <View style={styles.orderHeader}>
+        <View style={styles.orderInfo}>
+          <Entypo name="location-pin" size={24} color="black" />
+          <Text style={styles.orderText}>ออเดอร์ที่ {orderNumber}</Text>
+        </View>
+        <View style={styles.priceContainer}>
+          <Text style={styles.priceText}>
+            ค่าอาหาร:{" "}
+            {orderItems.reduce((acc, item) => acc + item.totalPrice, 0)} บาท
+          </Text>
+          <TouchableOpacity onPress={() => setExpanded(!expanded)}>
+            {!expanded ? (
+              <Entypo name="chevron-small-right" size={28} color="black" />
+            ) : (
+              <Entypo name="chevron-small-down" size={28} color="black" />
+            )}
+          </TouchableOpacity>
+        </View>
+      </View>
+      {expanded && (
+        <View style={styles.orderDetails}>
+          {orderItems.map((item, index) => (
+            <View key={index}>
+              <View style={styles.orderDes}>
+                <Text style={styles.menuText}>{item.menu?.name && ""}</Text>
+                <Text style={[styles.menuText, { fontWeight: "400" }]}>
+                  ราคา: {item.totalPrice} บาท
+                </Text>
+              </View>
+
+              <View style={styles.orderDes}>
+                <Text style={styles.subText}>จำนวนที่สั่ง</Text>
+                <Text style={styles.subText}>{item.quantity}</Text>
+              </View>
+
+              {item.orderItemExtra && item.orderItemExtra.length > 0 && (
+                <View style={styles.orderDes}>
+                  <Text style={styles.subText}>เพิ่มเติม:</Text>
+                  <Text style={styles.subText}>
+                    {item.orderItemExtra
+                      .map(
+                        (extra) =>
+                          `${extra.optionItem.name} +${extra.optionItem.price} บาท`
+                      )
+                      .join(", ")}
+                  </Text>
+                </View>
+              )}
+              {item.specialInstructions && (
+                <View style={styles.orderDes}>
+                  <Text style={styles.subText}>หมายเหตุ:</Text>
+                  <Text style={styles.subText}>{item.specialInstructions}</Text>
+                </View>
+              )}
+            </View>
+          ))}
+        </View>
+      )}
+    </View>
+  );
+};
 
 const HistoryScreen = () => {
   const navigation = useNavigation();
@@ -36,17 +136,39 @@ const HistoryScreen = () => {
       setError(null);
       try {
         const token = await AsyncStorage.getItem("authToken");
-        const formattedDate = date.toISOString().split("T")[0];
-        const response = await axios.post(
-          `${APIURL}shop/order/history`,
+        const formattedDate = date.toISOString();
+        const mockResponse = [
           {
-            params: { date: formattedDate },
+            orderId: 0,
+            orderDate: "2024-09-30T20:51:16.128Z",
+            orderStatus: "Completed",
+            orderItem: [
+              {
+                shopId: 0,
+                quantity: 1,
+                totalPrice: 50,
+                specialInstructions: "ไม่ผัก",
+                menuId: 0,
+                name: "ข้าวผัด",
+                orderItemExtras: [
+                  {
+                    optionItemId: 0,
+                    selected: true,
+                  },
+                ],
+              },
+            ],
           },
-          HeadersToken(token)
-        );
-        setOrders(response.data.orders || []);
+        ];
+
+        setOrders(mockResponse);
+        // const response = await axios.get(`${APIURL}shop/order/history`, {
+        //   params: { date: formattedDate },
+        //   ...HeadersToken(token),
+        // });
+        // setOrders(response.data.orders || []);
       } catch (err) {
-        setError("Failed to load orders");
+        setError(err.response?.data?.message || "Failed to load orders");
       } finally {
         setLoading(false);
       }
@@ -70,7 +192,7 @@ const HistoryScreen = () => {
         <View style={{ alignItems: "center" }}>
           <TouchableOpacity
             style={styles.datePickerButton}
-            onPress={() => setShowDatePicker(true)} // Show the picker when clicked
+            onPress={() => setShowDatePicker(true)}
           >
             <Text style={styles.dateText}>เลือกวันที่</Text>
           </TouchableOpacity>
@@ -92,27 +214,14 @@ const HistoryScreen = () => {
         ) : orders.length === 0 ? (
           <Text style={styles.noOrdersText}>ไม่มีออเดอร์ในวันที่เลือก</Text>
         ) : (
-          <FlatList
-            data={orders}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.orderItem}
-                onPress={() => toggleExpandOrder(item.id)}
-              >
-                <View style={styles.orderHeader}>
-                  <Text style={styles.description}>{item.title}</Text>
-                  <Text style={styles.description}>{item.price}</Text>
-                </View>
-                <Text style={styles.description}>รายละเอียด</Text>
-                {expandedOrderId === item.id && (
-                  <View style={styles.orderDetails}>
-                    <Text style={styles.description}>{item.details}</Text>
-                  </View>
-                )}
-              </TouchableOpacity>
-            )}
-          />
+          orders.map((order) => (
+            <OrderItem
+              key={order.orderId}
+              orderNumber={order.orderId.toString()}
+              orderItems={order.orderItem}
+              orderId={order.orderId}
+            />
+          ))
         )}
       </View>
     </View>
@@ -145,14 +254,70 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  orderDetails: {
-    paddingTop: 10,
-  },
   errorText: {
     textAlign: "center",
     fontSize: 16,
     color: "red",
     marginTop: 20,
+  },
+  orderContainer: {
+    marginBottom: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    borderRadius: 8,
+  },
+  orderInfo: {
+    maxWidth: "45%",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  orderDes: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    flex: 1,
+  },
+  orderText: {
+    color: "#000",
+    fontSize: 14,
+    fontWeight: "bold",
+    marginLeft: 8,
+  },
+  emptyText: {
+    color: "#f0f0f0",
+    fontSize: 32,
+    fontWeight: "300",
+    marginLeft: 8,
+  },
+  priceContainer: {
+    backgroundColor: "white",
+    maxWidth: "55%",
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  priceText: {
+    fontSize: 14,
+    marginRight: 8,
+  },
+  orderDetails: {
+    gap: 8,
+    marginTop: 8,
+    paddingHorizontal: 24,
+  },
+  menuText: {
+    color: "#000",
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  subText: {
+    fontSize: 12,
+    color: "#757575",
+    marginBottom: 2,
   },
 });
 

@@ -46,24 +46,14 @@ type OrderType = {
 
 type OrderItemProps = {
   orderNumber: string;
-  menu: string;
-  foodPrice: number;
-  totalPrice: number;
-  options: string;
-  comment: string;
-  extras: string;
+  orderItems: OrderItemType[];
   orderId: number;
   fetchMenuData: () => Promise<void>;
 };
 
 const OrderItem: React.FC<OrderItemProps> = ({
   orderNumber,
-  menu,
-  foodPrice,
-  totalPrice,
-  options,
-  comment,
-  extras,
+  orderItems,
   orderId,
   fetchMenuData,
 }) => {
@@ -95,40 +85,57 @@ const OrderItem: React.FC<OrderItemProps> = ({
           <Text style={styles.orderText}>ออเดอร์ที่ {orderNumber}</Text>
         </View>
         <View style={styles.priceContainer}>
-          <Text style={styles.priceText}>ค่าอาหาร {foodPrice} บาท</Text>
+          <Text style={styles.priceText}>
+            ค่าอาหาร:{" "}
+            {orderItems.reduce((acc, item) => acc + item.totalPrice, 0)} บาท
+          </Text>
           <TouchableOpacity onPress={() => setExpanded(!expanded)}>
             {!expanded ? (
-              <Entypo name="chevron-small-down" size={28} color="black" />
-            ) : (
               <Entypo name="chevron-small-right" size={28} color="black" />
+            ) : (
+              <Entypo name="chevron-small-down" size={28} color="black" />
             )}
           </TouchableOpacity>
         </View>
       </View>
       {expanded && (
         <View style={styles.orderDetails}>
-          <View style={styles.orderHeader}>
-            <Text style={styles.menuText}>เมนู:</Text>
-            <Text style={styles.menuText}>{menu}</Text>
-          </View>
-          <View style={styles.orderHeader}>
-            <Text style={styles.menuText}>จำนวน:</Text>
-            <Text style={styles.menuText}>{options}</Text>
-          </View>
-          {extras ? (
-            <View style={styles.orderHeader}>
-              <Text style={styles.menuText}>เพิ่มเติม:</Text>
-              <Text style={styles.menuText}>{extras}</Text>
+          {orderItems.map((item, index) => (
+            <View key={index}>
+              <View style={styles.orderDes}>
+                <Text style={styles.menuText}>{item.menu.name}</Text>
+                <Text style={[styles.menuText, { fontWeight: "400" }]}>
+                  ราคา: {item.totalPrice} บาท
+                </Text>
+              </View>
+
+              <View style={styles.orderDes}>
+                <Text style={styles.subText}>จำนวนที่สั่ง</Text>
+                <Text style={styles.subText}>{item.quantity}</Text>
+              </View>
+
+              {item.orderItemExtra && item.orderItemExtra.length > 0 && (
+                <View style={styles.orderDes}>
+                  <Text style={styles.subText}>เพิ่มเติม:</Text>
+                  <Text style={styles.subText}>
+                    {item.orderItemExtra
+                      .map(
+                        (extra) =>
+                          `${extra.optionItem.name} +${extra.optionItem.price} บาท`
+                      )
+                      .join(", ")}
+                  </Text>
+                </View>
+              )}
+              {item.specialInstructions && (
+                <View style={styles.orderDes}>
+                  <Text style={styles.subText}>หมายเหตุ:</Text>
+                  <Text style={styles.subText}>{item.specialInstructions}</Text>
+                </View>
+              )}
             </View>
-          ) : null}
-          <View style={styles.orderHeader}>
-            <Text style={styles.menuText}>comment:</Text>
-            <Text style={styles.menuText}>{comment}</Text>
-          </View>
-          <View style={styles.orderHeader}>
-            <Text style={styles.menuText}>ราคา:</Text>
-            <Text style={styles.menuText}>{totalPrice} บาท</Text>
-          </View>
+          ))}
+
           <TouchableOpacity
             style={styles.button}
             onPress={() => setIsModalVisible(true)}
@@ -224,31 +231,15 @@ const OrderList = () => {
           }
         >
           {orders.length > 0 ? (
-            orders.map((order) =>
-              order.orderItem.map((item) => (
-                <OrderItem
-                  key={item.orderItemId}
-                  orderNumber={order.orderId.toString()}
-                  menu={item.menu.name}
-                  options={item.quantity.toString()}
-                  comment={item.specialInstructions}
-                  foodPrice={item.menu.price}
-                  totalPrice={item.totalPrice}
-                  extras={
-                    item.orderItemExtra && item.orderItemExtra.length > 0
-                      ? item.orderItemExtra
-                          .map(
-                            (extra) =>
-                              `${extra.optionItem.name} +${extra.optionItem.price} บาท`
-                          )
-                          .join(", ")
-                      : ""
-                  }
-                  orderId={order.orderId}
-                  fetchMenuData={fetchMenuData}
-                />
-              ))
-            )
+            orders.map((order) => (
+              <OrderItem
+                key={order.orderId}
+                orderNumber={order.orderId.toString()}
+                orderItems={order.orderItem}
+                orderId={order.orderId}
+                fetchMenuData={fetchMenuData}
+              />
+            ))
           ) : (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>ยังไม่มีออเดอร์</Text>
@@ -310,6 +301,13 @@ const styles = StyleSheet.create({
     maxWidth: "45%",
     flexDirection: "row",
     alignItems: "center",
+  },
+  orderDes: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    flex: 1,
   },
   orderText: {
     color: "#000",

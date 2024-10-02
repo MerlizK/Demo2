@@ -44,6 +44,7 @@ const LoginScreen = () => {
         await AsyncStorage.setItem("authToken", token);
 
         setToken(token);
+        console.log("token ", token);
 
         navigation.navigate("Home" as never);
       } else {

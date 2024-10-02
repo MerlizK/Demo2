@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import Header from "../../../components/header";
 import { useNavigation } from "@react-navigation/native";
-import { launchImageLibrary } from "react-native-image-picker";
+import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
 import { APIURL } from "../../../Constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -80,29 +80,26 @@ const ProfileScreen = () => {
     navigation.navigate("HistoryScreen");
   };
 
-  const handleImagePick = () => {
-    launchImageLibrary(
-      {
-        mediaType: "photo",
-        quality: 1,
-        includeBase64: true,
-      },
-      (response) => {
-        if (response.didCancel) {
-          console.log("User cancelled image picker");
-        } else if (response.errorMessage) {
-          Alert.alert("Error", response.errorMessage);
-        } else {
-          const asset = response.assets?.[0];
-          if (asset) {
-            setData((prevData) => ({
-              ...prevData,
-              profileImage: asset.base64 || "",
-            }));
-          }
-        }
-      }
-    );
+  const handleImagePick = async () => {
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.granted === false) {
+      Alert.alert("Error", "Permission to access camera roll is required!");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 1,
+      base64: true,
+    });
+
+    if (!result.canceled && result.assets?.[0]?.base64) {
+      setData((prevData) => ({
+        ...prevData,
+        profileImage: result.assets[0].base64 || "",
+      }));
+    }
   };
 
   const handleSave = async () => {
@@ -163,7 +160,6 @@ const ProfileScreen = () => {
             )}
           </TouchableOpacity>
         </View>
-
         <View style={styles.formWrapper}>
           <View style={styles.inputRow}>
             <Text style={styles.label}>Username:</Text>
