@@ -111,10 +111,10 @@ const LoginScreen = () => {
         >
           <Text style={styles.registerButtonText}>Register</Text>
         </TouchableOpacity>
-
+        {/* 
         <TouchableOpacity onPress={openForgotPasswordModal}>
           <Text style={styles.forgotPassword}>Forgot password?</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       <ForgotPasswordModal

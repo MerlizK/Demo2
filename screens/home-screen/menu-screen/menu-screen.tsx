@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -16,6 +16,8 @@ import { APIURL } from "../../../Constants";
 import useShopStore from "../../../ShopStore";
 import { HeadersToken } from "../../../Utils";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
+import LoadingScreen from "../../../components/loading";
 
 interface Option {
   name: string;
@@ -62,12 +64,19 @@ const ShopMenuComponent = () => {
   const [description, setDescription] = useState<string>("");
   const [refreshing, setRefreshing] = useState(false);
   const [shopName, setShopName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const { shopData, fetchShopData } = useShopStore();
 
   useEffect(() => {
     fetchMenuData();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchMenuData();
+    }, [])
+  );
 
   const fetchMenuData = async () => {
     try {
@@ -147,6 +156,7 @@ const ShopMenuComponent = () => {
 
   const updateShopStatus = async (status: boolean) => {
     try {
+      setIsLoading(true);
       const token = await AsyncStorage.getItem("authToken");
       await axios.patch(
         `${APIURL}shop/update-status`,
@@ -156,6 +166,7 @@ const ShopMenuComponent = () => {
         }
       );
       setIsOpen(status);
+      setIsLoading(false);
     } catch (error) {
       console.error("Error updating shop status:", error);
     }
@@ -170,20 +181,11 @@ const ShopMenuComponent = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      fetchMenuData();
+      handleRefresh();
     } catch (error) {
       console.error("Error updating shop status:", error);
     }
   };
-  // const toggleStatus = (menuId: number): void => {
-  //   const menu = menus.find((menu) => menu.menuId === menuId);
-
-  //   const payload = {
-  //     ...menu,
-  //     status: !menu.status,
-  //   };
-  //   editMenu(payload);
-  // };
 
   const openAddMenuModal = () => {
     setIsOption(false);
@@ -427,6 +429,7 @@ const ShopMenuComponent = () => {
         onSave={handleSave}
         onDelete={() => handleDelete(currentMenu?.menuId || 0)}
       />
+      <LoadingScreen visible={isLoading} />
     </View>
   );
 };

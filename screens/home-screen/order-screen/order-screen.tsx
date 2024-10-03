@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { APIURL } from "../../../Constants";
 import useShopStore from "../../../ShopStore";
 import LoadingScreen from "../../../components/loading";
+import { useFocusEffect } from "@react-navigation/native";
 
 type OrderItemExtraType = {
   OrderItemExtraId: number;
@@ -199,11 +200,11 @@ const OrderList = () => {
         } else {
           setTimeout(() => {
             fetchMenuData();
-          }, 300);
+          }, 100);
         }
       };
-
       retryFetchShopStatus();
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching menu:", error);
     }
@@ -211,11 +212,11 @@ const OrderList = () => {
 
   useEffect(() => {
     fetchMenuData();
-    setIsLoading(false);
   }, []);
 
   const updateShopStatus = async (status: boolean) => {
     try {
+      setIsLoading(true);
       const token = await AsyncStorage.getItem("authToken");
       await axios.patch(
         `${APIURL}shop/update-status`,
@@ -225,6 +226,7 @@ const OrderList = () => {
         }
       );
       setIsOpen(status);
+      setIsLoading(false);
     } catch (error) {
       console.error("Error updating shop status:", error);
     }
@@ -240,7 +242,9 @@ const OrderList = () => {
             styles.statusButton,
             isOpen ? styles.openButton : styles.closedButton,
           ]}
-          onPress={() => updateShopStatus(!isOpen)}
+          onPress={() => {
+            updateShopStatus(!isOpen);
+          }}
         >
           <Text style={styles.buttonText}>
             {isOpen ? "เปิดรับออเดอร์" : "ปิดรับออเดอร์"}
