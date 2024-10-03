@@ -162,12 +162,7 @@ const MenuModal: React.FC<MenuModalProps> = ({
       {!isOption ? (
         <View style={styles.modalContent}>
           <TouchableOpacity style={styles.backButton} onPress={onClose}>
-            <Entypo
-              style={{ marginTop: 10 }}
-              name="chevron-left"
-              size={24}
-              color="black"
-            />
+            <Entypo name="chevron-left" size={24} color="black" />
             <Text style={styles.headerText}>ชื่อเมนู</Text>
           </TouchableOpacity>
           <TextInput
@@ -300,12 +295,7 @@ const MenuModal: React.FC<MenuModalProps> = ({
             style={styles.backButton}
             onPress={() => setIsOption(false)}
           >
-            <Entypo
-              style={{ marginTop: 10 }}
-              name="chevron-left"
-              size={24}
-              color="black"
-            />
+            <Entypo name="chevron-left" size={24} color="black" />
             <Text style={styles.headerText}>ชื่อตัวเลือก</Text>
           </TouchableOpacity>
           <TextInput
@@ -416,12 +406,7 @@ const MenuModal: React.FC<MenuModalProps> = ({
                         onPress={() => removeSubOption(index)}
                         style={styles.iconButton}
                       >
-                        <Entypo
-                          style={{ marginTop: 10 }}
-                          name="trash"
-                          size={24}
-                          color="black"
-                        />
+                        <Entypo name="trash" size={24} color="black" />
                       </TouchableOpacity>
                     ) : null}
                   </View>
@@ -458,12 +443,7 @@ const MenuModal: React.FC<MenuModalProps> = ({
                   onPress={addSubOption}
                   style={styles.iconButton}
                 >
-                  <Entypo
-                    style={{ marginTop: 10 }}
-                    name="squared-plus"
-                    size={24}
-                    color="black"
-                  />
+                  <Entypo name="squared-plus" size={24} color="black" />
                 </TouchableOpacity>
               </View>
             </View>
@@ -641,7 +621,6 @@ const styles = StyleSheet.create({
   },
   currencyLabel: {
     alignSelf: "center",
-    marginRight: 8,
   },
   iconButton: {
     padding: 4,
