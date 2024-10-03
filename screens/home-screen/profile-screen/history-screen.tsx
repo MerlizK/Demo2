@@ -41,15 +41,19 @@ type OrderItemProps = {
   orderNumber: string;
   orderItems: OrderItemType[];
   orderId: number;
+  expandedOrderId: string | null;
+  toggleExpandOrder: (orderId: string) => void;
 };
 
 const OrderItem: React.FC<OrderItemProps> = ({
   orderNumber,
   orderItems,
   orderId,
+  expandedOrderId,
+  toggleExpandOrder,
 }) => {
-  const [expanded, setExpanded] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  console.log("or", orderItems);
+  const isExpanded = expandedOrderId === orderId.toString(); // Check if this order is expanded
 
   return (
     <View style={styles.orderContainer}>
@@ -63,8 +67,10 @@ const OrderItem: React.FC<OrderItemProps> = ({
             ค่าอาหาร:{" "}
             {orderItems.reduce((acc, item) => acc + item.totalPrice, 0)} บาท
           </Text>
-          <TouchableOpacity onPress={() => setExpanded(!expanded)}>
-            {!expanded ? (
+          <TouchableOpacity
+            onPress={() => toggleExpandOrder(orderId.toString())}
+          >
+            {!isExpanded ? (
               <Entypo name="chevron-small-right" size={28} color="black" />
             ) : (
               <Entypo name="chevron-small-down" size={28} color="black" />
@@ -72,17 +78,17 @@ const OrderItem: React.FC<OrderItemProps> = ({
           </TouchableOpacity>
         </View>
       </View>
-      {expanded && (
+
+      {isExpanded && (
         <View style={styles.orderDetails}>
           {orderItems.map((item, index) => (
-            <View key={index}>
+            <View key={index} style={{ height: 100 }}>
               <View style={styles.orderDes}>
-                <Text style={styles.menuText}>{item.menu?.name && ""}</Text>
+                <Text style={styles.menuText}>{item.menu?.name}</Text>
                 <Text style={[styles.menuText, { fontWeight: "400" }]}>
                   ราคา: {item.totalPrice} บาท
                 </Text>
               </View>
-
               <View style={styles.orderDes}>
                 <Text style={styles.subText}>จำนวนที่สั่ง</Text>
                 <Text style={styles.subText}>{item.quantity}</Text>
@@ -137,32 +143,6 @@ const HistoryScreen = () => {
       try {
         const token = await AsyncStorage.getItem("authToken");
         const formattedDate = date.toISOString().split("T")[0];
-        // const mockResponse = [
-        //   {
-        //     orderId: 0,
-        //     orderDate: "2024-09-30T20:51:16.128Z",
-        //     orderStatus: "Completed",
-        //     orderItem: [
-        //       {
-        //         shopId: 0,
-        //         quantity: 1,
-        //         totalPrice: 50,
-        //         specialInstructions: "ไม่ผัก",
-        //         menuId: 0,
-        //         name: "ข้าวผัด",
-        //         orderItemExtras: [
-        //           {
-        //             optionItemId: 0,
-        //             selected: true,
-        //           },
-        //         ],
-        //       },
-        //     ],
-        //   },
-        // ];
-
-        // setOrders(mockResponse);
-        console.log(formattedDate);
         const response = await axios.get(`${APIURL}shop/order/history`, {
           params: { date: formattedDate },
           ...HeadersToken(token),
@@ -221,6 +201,8 @@ const HistoryScreen = () => {
               orderNumber={order.orderId.toString()}
               orderItems={order.orderItem}
               orderId={order.orderId}
+              expandedOrderId={expandedOrderId}
+              toggleExpandOrder={toggleExpandOrder}
             />
           ))
         )}

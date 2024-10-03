@@ -195,10 +195,6 @@ const ShopMenuComponent = () => {
     setIsAddMenuVisible(true);
     console.log(currentMenu);
   };
-  const handleSaveMenu = () => {
-    console.log("Save menu data", data);
-    console.log("Save menu menu", menus);
-  };
   const openEditMenuModal = async (menu: MenuItem) => {
     try {
       const token = await AsyncStorage.getItem("authToken");
@@ -214,6 +210,7 @@ const ShopMenuComponent = () => {
       setOptions(formatToResponse(response.data.option) || []);
       setImage(menu.picture || "");
       setDescription(menu.description || "");
+      setIsOption(false);
       setIsAddMenuVisible(true);
     } catch (error) {
       console.error("Error fetching option:", error);

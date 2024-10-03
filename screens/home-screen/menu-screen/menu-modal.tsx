@@ -11,7 +11,7 @@ import {
 } from "react-native";
 
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from "expo-file-system";
 import CustomCheckbox from "../../../components/checkbox";
 
 import Entypo from "@expo/vector-icons/Entypo";
@@ -64,10 +64,8 @@ const MenuModal: React.FC<MenuModalProps> = ({
   onSave,
   onDelete,
   isOption,
-  setIsOption
+  setIsOption,
 }) => {
-
-
   const handleImagePick = async () => {
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
@@ -77,9 +75,12 @@ const MenuModal: React.FC<MenuModalProps> = ({
       if (!result.canceled) {
         const selectedImageUri = result.assets[0].uri || null;
         if (selectedImageUri) {
-          const base64String = await FileSystem.readAsStringAsync(selectedImageUri, {
-            encoding: FileSystem.EncodingType.Base64,
-          });
+          const base64String = await FileSystem.readAsStringAsync(
+            selectedImageUri,
+            {
+              encoding: FileSystem.EncodingType.Base64,
+            }
+          );
           setPicture(`data:image/jpeg;base64,${base64String}`);
         }
       } else {
@@ -93,7 +94,7 @@ const MenuModal: React.FC<MenuModalProps> = ({
   const [isRequired, setIsRequired] = useState(true);
   const [isSingleChoice, setIsSingleChoice] = useState(true);
   const [currentOption, setCurrentOption] = useState("");
-  const [minmax, setMinMax] = useState([0, 0]);
+  const [minmax, setMinMax] = useState([1, 1]);
   const [subOptions, setSubOptions] = useState<SubOption[]>([]);
   const [newSubOption, setNewSubOption] = useState({
     name: "",
@@ -212,7 +213,7 @@ const MenuModal: React.FC<MenuModalProps> = ({
                       <TouchableOpacity
                         onPress={() => {
                           setOptionName(item.name);
-                          console.log('item ', item);
+                          console.log("item ", item);
                           setCurrentOption(item.optionId);
                           setMinMax(item.numberMinMax);
                           setIsOption(true);
@@ -220,9 +221,8 @@ const MenuModal: React.FC<MenuModalProps> = ({
                           setIsRequired(item.require);
                           setIsSingleChoice(
                             item.numberMinMax[0] === 1 &&
-                            item.numberMinMax[1] === 1
+                              item.numberMinMax[1] === 1
                           );
-
                         }}
                       >
                         <Entypo
@@ -252,7 +252,6 @@ const MenuModal: React.FC<MenuModalProps> = ({
                 setIsRequired(true);
                 setIsSingleChoice(true);
                 setOptionName("");
-                setMinMax([0, 0]);
                 setIsOption(true);
               }}
             >
@@ -269,7 +268,7 @@ const MenuModal: React.FC<MenuModalProps> = ({
               multiline={true}
               numberOfLines={4}
             />
-            <View style={styles.modalButtonRow}>
+            <View style={styles.buttonContainer}>
               {menu && (
                 <TouchableOpacity
                   style={styles.deleteButton}
@@ -353,29 +352,29 @@ const MenuModal: React.FC<MenuModalProps> = ({
                   setMinMax([min, min + 1]);
                 }}
               />
-              <TextInput
-                value={min.toString()}
-                onChangeText={(text) => {
-                  setMinMax([parseInt(text), max]);
-                  if (min !== 1) {
-                    setIsSingleChoice(false);
-                  }
-                }}
-                style={styles.lengthInput}
-                keyboardType="numeric"
-              />
-              <Text style={styles.subLabel}>-</Text>
-              <TextInput
-                value={max.toString()}
-                onChangeText={(text) => {
-                  setMinMax([min, parseInt(text)]);
-                  if (max !== 1) {
-                    setIsSingleChoice(false);
-                  }
-                }}
-                style={styles.lengthInput}
-                keyboardType="numeric"
-              />
+              {!isSingleChoice && (
+                <>
+                  <TextInput
+                    value={isNaN(min) ? "" : min.toString()}
+                    onChangeText={(text) => {
+                      const newMin = parseInt(text, 10);
+                      setMinMax([isNaN(newMin) ? 0 : newMin, max]);
+                    }}
+                    style={styles.lengthInput}
+                    keyboardType="numeric"
+                  />
+                  <Text style={styles.subLabel}>-</Text>
+                  <TextInput
+                    value={isNaN(max) ? "" : max.toString()}
+                    onChangeText={(text) => {
+                      const newMax = parseInt(text, 10);
+                      setMinMax([min, isNaN(newMax) ? 0 : newMax]);
+                    }}
+                    style={styles.lengthInput}
+                    keyboardType="numeric"
+                  />
+                </>
+              )}
             </View>
 
             <Text style={styles.subtitle}>เพิ่มตัวเลือกย่อย</Text>
@@ -615,7 +614,7 @@ const styles = StyleSheet.create({
     color: "black",
     fontWeight: "bold",
     // marginTop: 16,
-    // marginBottom: 16,
+    marginBottom: 16,
   },
   checkboxContainer: {
     flexDirection: "row",
@@ -650,6 +649,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "center",
+    marginBottom: 16,
   },
   lengthInput: {
     color: "#000",
