@@ -223,7 +223,20 @@ const OrderList = () => {
   return (
     <>
       <Header title="รายการออเดอร์" showBackButton={false} />
-      {isOpen ? (
+      <View style={styles.statusRow}>
+        <Text style={styles.statusText}>สถานะร้าน:</Text>
+        <TouchableOpacity
+          style={[
+            styles.statusButton,
+            isOpen ? styles.openButton : styles.closedButton,
+          ]}
+          onPress={() => updateShopStatus(!isOpen)}
+        >
+          <Text style={styles.buttonText}>
+            {isOpen ? "เปิดรับออเดอร์" : "ปิดรับออเดอร์"}
+          </Text>
+        </TouchableOpacity>
+      </View>
         <ScrollView
           style={styles.container}
           refreshControl={
@@ -246,33 +259,6 @@ const OrderList = () => {
             </View>
           )}
         </ScrollView>
-      ) : (
-        <ScrollView
-          style={styles.container}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-          }
-        >
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>ยังไม่มีออเดอร์</Text>
-          </View>
-        </ScrollView>
-      )}
-
-      <View style={styles.statusRow}>
-        <Text style={styles.statusText}>สถานะร้าน:</Text>
-        <TouchableOpacity
-          style={[
-            styles.statusButton,
-            isOpen ? styles.openButton : styles.closedButton,
-          ]}
-          onPress={() => updateShopStatus(!isOpen)}
-        >
-          <Text style={styles.buttonText}>
-            {isOpen ? "เปิดอยู่" : "ปิดอยู่"}
-          </Text>
-        </TouchableOpacity>
-      </View>
     </>
   );
 };

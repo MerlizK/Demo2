@@ -137,36 +137,37 @@ const HistoryScreen = () => {
       try {
         const token = await AsyncStorage.getItem("authToken");
         const formattedDate = date.toISOString().split("T")[0];
-        const mockResponse = [
-          {
-            orderId: 0,
-            orderDate: "2024-09-30T20:51:16.128Z",
-            orderStatus: "Completed",
-            orderItem: [
-              {
-                shopId: 0,
-                quantity: 1,
-                totalPrice: 50,
-                specialInstructions: "ไม่ผัก",
-                menuId: 0,
-                name: "ข้าวผัด",
-                orderItemExtras: [
-                  {
-                    optionItemId: 0,
-                    selected: true,
-                  },
-                ],
-              },
-            ],
-          },
-        ];
+        // const mockResponse = [
+        //   {
+        //     orderId: 0,
+        //     orderDate: "2024-09-30T20:51:16.128Z",
+        //     orderStatus: "Completed",
+        //     orderItem: [
+        //       {
+        //         shopId: 0,
+        //         quantity: 1,
+        //         totalPrice: 50,
+        //         specialInstructions: "ไม่ผัก",
+        //         menuId: 0,
+        //         name: "ข้าวผัด",
+        //         orderItemExtras: [
+        //           {
+        //             optionItemId: 0,
+        //             selected: true,
+        //           },
+        //         ],
+        //       },
+        //     ],
+        //   },
+        // ];
 
-        setOrders(mockResponse);
-        // const response = await axios.get(`${APIURL}shop/order/history`, {
-        //   params: { date: formattedDate },
-        //   ...HeadersToken(token),
-        // });
-        // setOrders(response.data.orders || []);
+        // setOrders(mockResponse);
+        console.log(formattedDate);
+        const response = await axios.get(`${APIURL}shop/order/history`, {
+          params: { date: formattedDate },
+          ...HeadersToken(token),
+        });
+        setOrders(response.data || []);
       } catch (err) {
         setError(err.response?.data?.message || "Failed to load orders");
       } finally {

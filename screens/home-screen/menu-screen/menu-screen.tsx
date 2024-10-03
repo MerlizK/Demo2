@@ -320,7 +320,7 @@ const ShopMenuComponent = () => {
           onPress={() => updateShopStatus(!isOpen)}
         >
           <Text style={styles.buttonText}>
-            {isOpen ? "ร้านเปิด" : "ร้านปิด"}
+            {isOpen ? "เปิดรับออเดอร์" : "ปิดรับออเดอร์"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -353,7 +353,7 @@ const ShopMenuComponent = () => {
                 onPress={() => updateMenuStatus(menu.menuId)}
               >
                 <Text style={styles.statusButtonText}>
-                  {menu.status ? "เหลือ" : "หมด"}
+                  {menu.status ? "ขาย" : "ไม่ขาย"}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
