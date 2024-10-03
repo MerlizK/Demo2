@@ -15,6 +15,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { APIURL } from "../../../Constants";
 import useShopStore from "../../../ShopStore";
+import LoadingScreen from "../../../components/loading";
 
 type OrderItemExtraType = {
   OrderItemExtraId: number;
@@ -175,6 +176,7 @@ const OrderList = () => {
   const [refreshing, setRefreshing] = useState(false);
   const { shopData, fetchShopData } = useShopStore();
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -189,12 +191,19 @@ const OrderList = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setOrders(response.data);
-      fetchShopData(token);
-      if (shopData.status) {
-        setIsOpen(shopData.status);
-      } else {
-        fetchMenuData();
-      }
+      await fetchShopData(token);
+
+      const retryFetchShopStatus = () => {
+        if (shopData && shopData.status) {
+          setIsOpen(shopData.status);
+        } else {
+          setTimeout(() => {
+            fetchMenuData();
+          }, 300);
+        }
+      };
+
+      retryFetchShopStatus();
     } catch (error) {
       console.error("Error fetching menu:", error);
     }
@@ -202,6 +211,7 @@ const OrderList = () => {
 
   useEffect(() => {
     fetchMenuData();
+    setIsLoading(false);
   }, []);
 
   const updateShopStatus = async (status: boolean) => {
@@ -237,28 +247,29 @@ const OrderList = () => {
           </Text>
         </TouchableOpacity>
       </View>
-        <ScrollView
-          style={styles.container}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-          }
-        >
-          {orders.length > 0 ? (
-            orders.map((order) => (
-              <OrderItem
-                key={order.orderId}
-                orderNumber={order.orderId.toString()}
-                orderItems={order.orderItem}
-                orderId={order.orderId}
-                fetchMenuData={fetchMenuData}
-              />
-            ))
-          ) : (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>ยังไม่มีออเดอร์</Text>
-            </View>
-          )}
-        </ScrollView>
+      <ScrollView
+        style={styles.container}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
+      >
+        {orders.length > 0 ? (
+          orders.map((order) => (
+            <OrderItem
+              key={order.orderId}
+              orderNumber={order.orderId.toString()}
+              orderItems={order.orderItem}
+              orderId={order.orderId}
+              fetchMenuData={fetchMenuData}
+            />
+          ))
+        ) : (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>ยังไม่มีออเดอร์</Text>
+          </View>
+        )}
+      </ScrollView>
+      <LoadingScreen visible={isLoading} />
     </>
   );
 };
