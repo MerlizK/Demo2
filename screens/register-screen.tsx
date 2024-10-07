@@ -1,3 +1,4 @@
+import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
 import {
@@ -10,64 +11,87 @@ import {
   Image,
   Alert,
 } from "react-native";
-import { launchImageLibrary } from "react-native-image-picker";
 import axios from "axios";
 import { APIURL } from "../Constants";
 import Entypo from "@expo/vector-icons/Entypo";
-
-const sampleRes = {
-  canteenId: 0,
-  username: "string",
-  password: "string",
-  shopName: "string",
-  profilePicture: "string",
-  tel: "string",
-  shopNumber: "string",
-};
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const RegisterScreen = () => {
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [base64Image, setBase64Image] = useState<string | null>(null);
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [shopName, setShopName] = useState<string>("");
+  const [tel, setTel] = useState<string>("");
+  const [canteenId, setCanteenId] = useState<number>(0);
+  const [shopNumber, setShopNumber] = useState<string>("");
+
   const navigation = useNavigation();
 
   const handleRegister = async () => {
+    if (!username || !password || !shopName || !tel || !canteenId) {
+      Alert.alert("Error", "All fields are required.");
+      return;
+    }
+    if (!base64Image) {
+      Alert.alert("Error", "Please select an image before submitting.");
+      return;
+    }
+
     try {
       const payload = {
-        ...sampleRes,
+        canteenId,
+        username,
+        password,
+        shopName,
         profilePicture: base64Image,
+        tel,
+        shopNumber,
       };
-      const response = await axios.post(`${APIURL}shop/create-shop`, payload);
+      console.log("first", payload);
+
+      const response = await axios.post(`${APIURL}shop/create-shop`, payload, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       if (response.status === 201) {
         const { token } = response.data;
+        await AsyncStorage.setItem("authToken", token);
         navigation.navigate("Home" as never);
       } else {
-        Alert.alert("Login Failed", "Invalid username or password");
+        Alert.alert("Registration Failed", "Please check your information.");
       }
     } catch (error) {
-      console.error("Error during login:", error);
-      Alert.alert("Login Error", "An error occurred during login");
+      const message =
+        error.response?.data?.message ||
+        "An error occurred during registration.";
+      Alert.alert("Registration Error", message);
     }
   };
 
-  const handleImagePick = () => {
-    launchImageLibrary(
-      {
-        mediaType: "photo",
-        quality: 1,
-        includeBase64: true,
-      },
-      (response) => {
-        if (response.didCancel) {
-          console.log("User cancelled image picker");
-        } else if (response.errorCode) {
-          console.log("ImagePicker Error: ", response.errorCode);
-        } else {
-          const selectedImage = response.assets?.[0];
-          setImageUri(selectedImage?.uri || null);
-          setBase64Image(selectedImage?.base64 || null); // Save the Base64 string
-        }
-      }
-    );
+  const handleImagePick = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission Denied",
+        "You need to allow access to your photos in settings."
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.7,
+      base64: true,
+    });
+
+    if (!result.canceled) {
+      const selectedImage = result.assets?.[0];
+      setImageUri(selectedImage?.uri || null);
+      setBase64Image(selectedImage?.base64 || null);
+    }
   };
 
   return (
@@ -77,7 +101,12 @@ const RegisterScreen = () => {
       <View style={styles.formContainer}>
         <View style={styles.row}>
           <Text style={styles.label}>Username:</Text>
-          <TextInput placeholder="Username" style={styles.input} />
+          <TextInput
+            placeholder="Username"
+            style={styles.input}
+            value={username}
+            onChangeText={setUsername}
+          />
         </View>
 
         <View style={styles.row}>
@@ -86,12 +115,19 @@ const RegisterScreen = () => {
             placeholder="Password"
             style={styles.input}
             secureTextEntry
+            value={password}
+            onChangeText={setPassword}
           />
         </View>
 
         <View style={styles.row}>
           <Text style={styles.label}>ชื่อร้าน:</Text>
-          <TextInput placeholder="Shop Name" style={styles.input} />
+          <TextInput
+            placeholder="Shop Name"
+            style={styles.input}
+            value={shopName}
+            onChangeText={setShopName}
+          />
         </View>
 
         <TouchableOpacity
@@ -103,7 +139,7 @@ const RegisterScreen = () => {
           ) : (
             <Entypo
               style={{ marginTop: 10 }}
-              name="chevron-small-down"
+              name="camera"
               size={48}
               color="black"
             />
@@ -112,17 +148,33 @@ const RegisterScreen = () => {
 
         <View style={styles.row}>
           <Text style={styles.label}>เบอร์โทรศัพท์:</Text>
-          <TextInput placeholder="Phone Number" style={styles.input} />
+          <TextInput
+            placeholder="Phone Number"
+            style={styles.input}
+            value={tel}
+            onChangeText={setTel}
+          />
         </View>
 
         <View style={styles.row}>
           <Text style={styles.label}>โรงอาหาร:</Text>
-          <TextInput placeholder="Canteen" style={styles.input} />
+          <TextInput
+            placeholder="Canteen ID"
+            style={styles.input}
+            value={canteenId.toString()}
+            keyboardType="numeric"
+            onChangeText={(text) => setCanteenId(Number(text))}
+          />
         </View>
 
         <View style={styles.row}>
           <Text style={styles.label}>หมายเลขร้าน:</Text>
-          <TextInput placeholder="Shop Number" style={styles.input} />
+          <TextInput
+            placeholder="Shop Number"
+            style={styles.input}
+            value={shopNumber}
+            onChangeText={setShopNumber}
+          />
         </View>
 
         <TouchableOpacity
