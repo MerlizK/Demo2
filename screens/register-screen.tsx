@@ -1,6 +1,6 @@
-import { KuScreens } from '../../../navigation/un-auth-stack';
-import { useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
+import * as ImagePicker from "expo-image-picker";
+import { useNavigation } from "@react-navigation/native";
+import React, { useState } from "react";
 import {
   View,
   TextInput,
@@ -9,30 +9,89 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Image,
-} from 'react-native';
-import { launchImageLibrary } from 'react-native-image-picker';
-import CamIcon from '../assets/icons/camera.svg';
+  Alert,
+} from "react-native";
+import axios from "axios";
+import { APIURL } from "../Constants";
+import Entypo from "@expo/vector-icons/Entypo";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const KRegisterScreen = () => {
+const RegisterScreen = () => {
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [base64Image, setBase64Image] = useState<string | null>(null);
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [shopName, setShopName] = useState<string>("");
+  const [tel, setTel] = useState<string>("");
+  const [canteenId, setCanteenId] = useState<number>(0);
+  const [shopNumber, setShopNumber] = useState<string>("");
+
   const navigation = useNavigation();
 
-  const handleImagePick = () => {
-    launchImageLibrary(
-      {
-        mediaType: 'photo',
-        quality: 1,
-      },
-      response => {
-        if (response.didCancel) {
-          console.log('User cancelled image picker');
-        } else if (response.errorCode) {
-          console.log('ImagePicker Error: ', response.errorCode);
-        } else {
-          setImageUri(response.assets?.[0].uri || null);
-        }
-      },
-    );
+  const handleRegister = async () => {
+    if (!username || !password || !shopName || !tel || !canteenId) {
+      Alert.alert("Error", "All fields are required.");
+      return;
+    }
+    if (!base64Image) {
+      Alert.alert("Error", "Please select an image before submitting.");
+      return;
+    }
+
+    try {
+      const payload = {
+        canteenId,
+        username,
+        password,
+        shopName,
+        profilePicture: base64Image,
+        tel,
+        shopNumber,
+      };
+      console.log("first", payload);
+
+      const response = await axios.post(`${APIURL}shop/create-shop`, payload, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.status === 201) {
+        const { token } = response.data;
+        await AsyncStorage.setItem("authToken", token);
+        navigation.navigate("Home" as never);
+      } else {
+        Alert.alert("Registration Failed", "Please check your information.");
+      }
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        "An error occurred during registration.";
+      Alert.alert("Registration Error", message);
+    }
+  };
+
+  const handleImagePick = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission Denied",
+        "You need to allow access to your photos in settings."
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.7,
+      base64: true,
+    });
+
+    if (!result.canceled) {
+      const selectedImage = result.assets?.[0];
+      setImageUri(selectedImage?.uri || null);
+      setBase64Image(selectedImage?.base64 || null);
+    }
   };
 
   return (
@@ -42,7 +101,12 @@ const KRegisterScreen = () => {
       <View style={styles.formContainer}>
         <View style={styles.row}>
           <Text style={styles.label}>Username:</Text>
-          <TextInput placeholder="Username" style={styles.input} />
+          <TextInput
+            placeholder="Username"
+            style={styles.input}
+            value={username}
+            onChangeText={setUsername}
+          />
         </View>
 
         <View style={styles.row}>
@@ -51,42 +115,72 @@ const KRegisterScreen = () => {
             placeholder="Password"
             style={styles.input}
             secureTextEntry
+            value={password}
+            onChangeText={setPassword}
           />
         </View>
 
         <View style={styles.row}>
           <Text style={styles.label}>ชื่อร้าน:</Text>
-          <TextInput placeholder="Shop Name" style={styles.input} />
+          <TextInput
+            placeholder="Shop Name"
+            style={styles.input}
+            value={shopName}
+            onChangeText={setShopName}
+          />
         </View>
 
         <TouchableOpacity
           style={styles.imageUploadContainer}
-          onPress={handleImagePick}>
+          onPress={handleImagePick}
+        >
           {imageUri ? (
             <Image source={{ uri: imageUri }} style={styles.imagePreview} />
           ) : (
-            <CamIcon width={50} height={50} />
+            <Entypo
+              style={{ marginTop: 10 }}
+              name="camera"
+              size={48}
+              color="black"
+            />
           )}
         </TouchableOpacity>
 
         <View style={styles.row}>
           <Text style={styles.label}>เบอร์โทรศัพท์:</Text>
-          <TextInput placeholder="Phone Number" style={styles.input} />
+          <TextInput
+            placeholder="Phone Number"
+            style={styles.input}
+            value={tel}
+            onChangeText={setTel}
+          />
         </View>
 
         <View style={styles.row}>
           <Text style={styles.label}>โรงอาหาร:</Text>
-          <TextInput placeholder="Canteen" style={styles.input} />
+          <TextInput
+            placeholder="Canteen ID"
+            style={styles.input}
+            value={canteenId.toString()}
+            keyboardType="numeric"
+            onChangeText={(text) => setCanteenId(Number(text))}
+          />
         </View>
 
         <View style={styles.row}>
           <Text style={styles.label}>หมายเลขร้าน:</Text>
-          <TextInput placeholder="Shop Number" style={styles.input} />
+          <TextInput
+            placeholder="Shop Number"
+            style={styles.input}
+            value={shopNumber}
+            onChangeText={setShopNumber}
+          />
         </View>
 
         <TouchableOpacity
           style={styles.registerButton}
-          onPress={() => navigation.navigate(KuScreens.KHOMESCREEN as never)}>
+          onPress={handleRegister}
+        >
           <Text style={styles.registerButtonText}>สร้างร้าน</Text>
         </TouchableOpacity>
       </View>
@@ -97,53 +191,53 @@ const KRegisterScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   header: {
-    color: '#000',
+    color: "#000",
     left: 20,
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginVertical: 20,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
   formContainer: {
-    width: '90%',
+    width: "90%",
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     marginBottom: 20,
     marginHorizontal: 20,
   },
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 15,
   },
   label: {
     width: 100,
     fontSize: 16,
-    color: '#000',
+    color: "#000",
     marginRight: 10,
   },
   input: {
-    color: '#000',
+    color: "#000",
     flex: 1,
     padding: 10,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 5,
   },
   imageUploadContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginVertical: 20,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 5,
     padding: 10,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: "#f0f0f0",
   },
   imagePreview: {
     width: 100,
@@ -151,17 +245,17 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   registerButton: {
-    width: '100%',
-    backgroundColor: '#000',
+    width: "100%",
+    backgroundColor: "#000",
     padding: 15,
     borderRadius: 5,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 20,
   },
   registerButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
 
-export default KRegisterScreen;
+export default RegisterScreen;

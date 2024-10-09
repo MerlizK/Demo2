@@ -1,5 +1,6 @@
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { Checkbox } from "react-native-paper";
 
 const CustomCheckbox = ({
   label,
@@ -10,34 +11,24 @@ const CustomCheckbox = ({
   checked: boolean;
   onPress: () => void;
 }) => (
-  <TouchableOpacity style={styles.checkboxContainer} onPress={onPress}>
-    <View style={[styles.checkbox, checked && styles.checked]}>
-      {/* {checked && <View style />} */}
-    </View>
+  <View style={styles.checkboxContainer}>
+    <Checkbox
+      status={checked ? "checked" : "unchecked"}
+      onPress={onPress}
+      color="#000"
+    />
     <Text style={styles.label}>{label}</Text>
-  </TouchableOpacity>
+  </View>
 );
+
 const styles = StyleSheet.create({
   checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 8,
   },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 2,
-    borderColor: '#000',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 8,
-  },
-  checked: {
-    backgroundColor: '#000',
-  },
   label: {
-    color: '#000',
+    color: "#000",
     fontSize: 16,
   },
 });

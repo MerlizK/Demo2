@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,8 +12,12 @@ import {
 import axios from "axios";
 import MenuModal from "./menu-modal";
 import Entypo from "@expo/vector-icons/Entypo";
-import { HeadersToken } from "../../../Constants";
+import { APIURL } from "../../../Constants";
 import useShopStore from "../../../ShopStore";
+import { HeadersToken } from "../../../Utils";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
+import LoadingScreen from "../../../components/loading";
 
 interface Option {
   name: string;
@@ -25,7 +29,6 @@ interface Option {
 
 interface SubOption {
   name: string;
-  subOptionId: string;
   price: string;
 }
 
@@ -46,8 +49,9 @@ const ShopMenuComponent = () => {
     data: [],
   });
   const [menus, setMenus] = useState<MenuItem[]>([]);
-  const [isOpen, setIsOpen] = useState(data.isOpen);
+
   const [isAddMenuVisible, setIsAddMenuVisible] = useState(false);
+  const [isOption, setIsOption] = useState(false);
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
   const [currentMenu, setCurrentMenu] = useState<MenuItem | null>(null);
   const [confirmAction, setConfirmAction] = useState<null | "save" | "delete">(
@@ -58,22 +62,32 @@ const ShopMenuComponent = () => {
   const [image, setImage] = useState<string | null>(null);
   const [description, setDescription] = useState<string>("");
   const [refreshing, setRefreshing] = useState(false);
+  const [shopName, setShopName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { shopData, fetchShopData } = useShopStore();
+
+  useEffect(() => {
+    fetchMenuData();
+  }, []);
 
   const fetchMenuData = async () => {
     try {
+      const token = await AsyncStorage.getItem("authToken");
       const response = await axios.get(
-        "https://ku-man.runnakjeen.com/shop/menu",
-        HeadersToken
+        `${APIURL}shop/menu`,
+        HeadersToken(token)
       );
-
       setData(response.data as any);
       setMenus(response.data as unknown as MenuItem[]);
-      console.log(menus);
-      // setIsOpen(MockMenu.isOpen);
+      fetchShopData(token);
+      setShopName(shopData.shopName);
+      console.log("shopData.status", shopData.status);
     } catch (error) {
       console.error("Error fetching menu:", error);
     }
   };
+
   const handleRefresh = async () => {
     setRefreshing(true);
     await fetchMenuData();
@@ -87,10 +101,11 @@ const ShopMenuComponent = () => {
     description: string;
   }) => {
     try {
-      const response = await axios.post(
-        "https://ku-man.runnakjeen.com/shop/create-menu",
+      const token = await AsyncStorage.getItem("authToken");
+      await axios.post(
+        `${APIURL}shop/create-menu`,
         payload,
-        HeadersToken
+        HeadersToken(token)
       );
     } catch (error) {
       console.error("Error fetching menu:", error);
@@ -103,12 +118,14 @@ const ShopMenuComponent = () => {
     price: number;
     description?: string;
     status: boolean;
+    option: Option;
   }) => {
     try {
-      const response = await axios.post(
-        "https://ku-man.runnakjeen.com/shop/edit-menu",
+      const token = await AsyncStorage.getItem("authToken");
+      await axios.patch(
+        `${APIURL}shop/edit-menu`,
         payload,
-        HeadersToken
+        HeadersToken(token)
       );
       fetchMenuData();
     } catch (error) {
@@ -117,36 +134,52 @@ const ShopMenuComponent = () => {
   };
   const deleteMenu = async (menuId: number) => {
     try {
-      const response = await axios.delete(
-        `https://ku-man.runnakjeen.com/shop/delete-menu`,
-        {
-          params: { menuId },
-          ...HeadersToken,
-        }
-      );
+      const token = await AsyncStorage.getItem("authToken");
+
+      const response = await axios.delete(`${APIURL}shop/delete-menu`, {
+        params: { menuId },
+        ...HeadersToken(token),
+      });
       console.log("Menu deleted successfully:", response.data);
     } catch (error) {
       console.error("Error deleting menu:", error);
     }
   };
-  const { shopData } = useShopStore();
 
-  useEffect(() => {
-    fetchMenuData();
-    console.log(shopData);
-  }, []);
-
-  const toggleStatus = (menuId: number): void => {
-    const menu = menus.find((menu) => menu.menuId === menuId);
-
-    const payload = {
-      ...menu,
-      status: !menu.status,
-    };
-    editMenu(payload);
+  const updateShopStatus = async (status: boolean) => {
+    try {
+      setIsLoading(true);
+      const token = await AsyncStorage.getItem("authToken");
+      await axios.patch(
+        `${APIURL}shop/update-status`,
+        { status },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error updating shop status:", error);
+    }
+  };
+  const updateMenuStatus = async (menuId: number) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      await axios.patch(
+        `${APIURL}shop/menu/update-status`,
+        { menuId },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      handleRefresh();
+    } catch (error) {
+      console.error("Error updating shop status:", error);
+    }
   };
 
   const openAddMenuModal = () => {
+    setIsOption(false);
     setCurrentMenu(null);
     setPrice(0);
     setOptions([]);
@@ -155,19 +188,26 @@ const ShopMenuComponent = () => {
     setIsAddMenuVisible(true);
     console.log(currentMenu);
   };
-  const handleSaveMenu = () => {
-    console.log("Save menu data", data);
-    console.log("Save menu menu", menus);
-  };
+  const openEditMenuModal = async (menu: MenuItem) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      const response = await axios.get(`${APIURL}shop/menu/info`, {
+        params: { menuId: menu.menuId },
+        ...HeadersToken(token),
+      });
 
-  const openEditMenuModal = (menu: MenuItem) => {
-    setCurrentMenu(menu);
-    setPrice(menu.price || 0);
-    setOptions(menu.option || []);
-    setImage(menu.picture || null);
-    setDescription(menu.description || "");
-    setIsAddMenuVisible(true);
-    console.log(currentMenu);
+      console.log("Response data:", response.data);
+
+      setCurrentMenu(menu);
+      setPrice(menu.price || 0);
+      setOptions(formatToResponse(response.data.option) || []);
+      setImage(menu.picture || "");
+      setDescription(menu.description || "");
+      setIsOption(false);
+      setIsAddMenuVisible(true);
+    } catch (error) {
+      console.error("Error fetching option:", error);
+    }
   };
 
   const handleSave = () => {
@@ -180,6 +220,49 @@ const ShopMenuComponent = () => {
     setConfirmAction("delete");
     setIsConfirmModalVisible(true);
   };
+  const formatToRequest = (optionData: Option[]) => {
+    if (!Array.isArray(optionData)) {
+      throw new TypeError("optionData must be an array");
+    }
+
+    return optionData.map((option: Option) => {
+      if (!option || typeof option !== "object") {
+        throw new TypeError("Invalid option object");
+      }
+
+      const [minChoose, maxChoose] = Array.isArray(option.numberMinMax)
+        ? option.numberMinMax
+        : [0, 0];
+
+      return {
+        name: option.name || "Default Name",
+        mustChoose: option.require || false,
+        maxChoose: maxChoose,
+        minChoose: minChoose,
+        optionItems: Array.isArray(option.subOption)
+          ? option.subOption.map((sub: SubOption) => ({
+              name: sub.name || "Default SubOption",
+              price: sub.price ? Number(sub.price) : 0,
+            }))
+          : [],
+      };
+    });
+  };
+
+  function formatToResponse(options: any[]): Option[] {
+    return options.map((option, index) => ({
+      name: option.name,
+      optionId: index.toString(),
+      require: option.mustChoose || false,
+      numberMinMax: [option.minChoose || 0, option.maxChoose || 0],
+      subOption: Array.isArray(option.optionItem)
+        ? option.optionItem.map((item: any) => ({
+            name: item.name || "Default Name",
+            price: item.price ? item.price.toString() : "0",
+          }))
+        : [],
+    }));
+  }
 
   const confirmActionHandler = () => {
     if (confirmAction === "save") {
@@ -191,6 +274,7 @@ const ShopMenuComponent = () => {
           price: price,
           description: description,
           status: currentMenu.status,
+          option: formatToRequest(options),
         };
         console.log("payload ", payload);
         editMenu(payload);
@@ -200,6 +284,7 @@ const ShopMenuComponent = () => {
           picture: image || "",
           price: price || 0,
           description: description || "",
+          option: formatToRequest(options) || [],
         };
         console.log("payload ", payload);
         createMenu(payload);
@@ -214,18 +299,18 @@ const ShopMenuComponent = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.shopName}>ร้านที่1</Text>
+      <Text style={styles.shopName}>{shopName}</Text>
       <View style={styles.statusRow}>
         <Text style={styles.statusText}>สถานะร้าน:</Text>
         <TouchableOpacity
           style={[
             styles.statusButton,
-            isOpen ? styles.openButton : styles.closedButton,
+            shopData.status ? styles.openButton : styles.closedButton,
           ]}
-          onPress={() => setIsOpen(!isOpen)}
+          onPress={() => updateShopStatus(!shopData.status)}
         >
           <Text style={styles.buttonText}>
-            {isOpen ? "ร้านเปิด" : "ร้านปิด"}
+            {shopData.status ? "เปิดรับออเดอร์" : "ปิดรับออเดอร์"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -245,7 +330,7 @@ const ShopMenuComponent = () => {
               </View>
               {menu.picture && (
                 <Image
-                  source={{ uri: menu.picture }}
+                  source={{ uri: `${menu.picture}` }}
                   style={styles.menuImage}
                 />
               )}
@@ -255,17 +340,16 @@ const ShopMenuComponent = () => {
                   styles.statusButton,
                   menu.status ? styles.statusAvailable : styles.statusSoldOut,
                 ]}
-                onPress={() => toggleStatus(menu.menuId)}
+                onPress={() => updateMenuStatus(menu.menuId)}
               >
                 <Text style={styles.statusButtonText}>
-                  {menu.status ? "เหลือ" : "หมด"}
+                  {menu.status ? "ขาย" : "ไม่ขาย"}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.settingsButton}
                 onPress={() => {
                   openEditMenuModal(menu);
-                  console.log(menu);
                 }}
               >
                 <Entypo
@@ -289,9 +373,6 @@ const ShopMenuComponent = () => {
       >
         <TouchableOpacity style={styles.addButton} onPress={openAddMenuModal}>
           <Text style={styles.addButtonText}>เพิ่มเมนู</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.addButton} onPress={handleSaveMenu}>
-          <Text style={styles.addButtonText}>บันทึกการตั้งค่าเมนู</Text>
         </TouchableOpacity>
       </View>
 
@@ -329,6 +410,8 @@ const ShopMenuComponent = () => {
         options={options}
         picture={image}
         description={description}
+        isOption={isOption}
+        setIsOption={setIsOption}
         setDescription={setDescription}
         setMenu={setCurrentMenu}
         setPrice={setPrice}
@@ -337,6 +420,7 @@ const ShopMenuComponent = () => {
         onSave={handleSave}
         onDelete={() => handleDelete(currentMenu?.menuId || 0)}
       />
+      <LoadingScreen visible={isLoading} />
     </View>
   );
 };

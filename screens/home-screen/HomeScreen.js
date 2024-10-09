@@ -1,14 +1,16 @@
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 import { createMaterialBottomTabNavigator } from "react-native-paper/react-navigation";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import TabOrder from "./TabShopSelectOrder";
-import TabInfo from "./TabShopInfo";
-import TabTime from "./TabShopSettingTime";
 import MenuScreen from "./menu-screen/menu-screen";
+import useShopStore from "../../ShopStore";
+import ProfileScreen from "./profile-screen/profile-screen";
+import SpecialTimeSetting from "./time-screen/time-screen";
+import OrderList from "./order-screen/order-screen";
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -16,8 +18,15 @@ function HomeTabs() {
   const { fetchShopData } = useShopStore();
 
   useEffect(() => {
-    fetchShopData();
+    const getToken = async () => {
+      const token = await AsyncStorage.getItem("authToken");
+      if (token) {
+        fetchShopData(token);
+      }
+    };
+    getToken();
   }, []);
+
   return (
     <Tab.Navigator
       screenOptions={{ headerShown: false }}
@@ -30,7 +39,7 @@ function HomeTabs() {
     >
       <Tab.Screen
         name="TabOrder"
-        component={TabOrder}
+        component={OrderList}
         options={{
           tabBarLabel: "Order",
           tabBarIcon: ({ color }) => (
@@ -50,7 +59,7 @@ function HomeTabs() {
       />
       <Tab.Screen
         name="TabTime"
-        component={TabTime}
+        component={SpecialTimeSetting}
         options={{
           tabBarLabel: "Time",
           tabBarIcon: ({ color }) => (
@@ -60,7 +69,7 @@ function HomeTabs() {
       />
       <Tab.Screen
         name="TabShop"
-        component={TabInfo}
+        component={ProfileScreen}
         options={{
           tabBarLabel: "Shop",
           tabBarIcon: ({ color }) => (

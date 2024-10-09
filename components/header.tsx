@@ -1,22 +1,37 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-
 import Entypo from "@expo/vector-icons/Entypo";
 
-const Header = ({ title, showBackButton = false, onBackPress }) => {
+interface HeaderProps {
+  title: string;
+  showBackButton?: boolean;
+  onBackPress?: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({
+  title,
+  showBackButton = false,
+  onBackPress,
+}) => {
   return (
     <View style={styles.headerContainer}>
-      {showBackButton && (
-        <TouchableOpacity onPress={onBackPress} style={styles.backButton}>
-          <Entypo
-            name="chevron-small-down"
-            size={24}
-            color="black"
-            style={{ width: "100%", bottom: 8 }}
-          />
-        </TouchableOpacity>
-      )}
-      <Text style={styles.headerTitle}>{title}</Text>
+      <TouchableOpacity
+        style={{ flexDirection: "row" }}
+        onPress={onBackPress ? onBackPress : () => {}}
+        disabled={!showBackButton}
+      >
+        {showBackButton && (
+          <View style={styles.backButton}>
+            <Entypo
+              name="chevron-small-left"
+              size={24}
+              color="black"
+              style={{ width: "100%", bottom: 8 }}
+            />
+          </View>
+        )}
+        <Text style={styles.headerTitle}>{title}</Text>
+      </TouchableOpacity>
       <View style={styles.headerLine} />
     </View>
   );
@@ -35,7 +50,6 @@ const styles = StyleSheet.create({
     color: "black",
     fontSize: 18,
     fontWeight: "bold",
-    textAlign: "center",
   },
   headerLine: {
     width: "100%",
@@ -43,12 +57,7 @@ const styles = StyleSheet.create({
     backgroundColor: "green",
     marginTop: 10,
   },
-  backButton: {
-    position: "absolute",
-    left: 16,
-    top: 80,
-    padding: 10,
-  },
+  backButton: { top: 10 },
   backButtonText: {
     color: "black",
     fontSize: 18,
