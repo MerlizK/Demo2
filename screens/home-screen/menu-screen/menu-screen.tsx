@@ -50,7 +50,6 @@ const ShopMenuComponent = () => {
   });
   const [menus, setMenus] = useState<MenuItem[]>([]);
 
-  const [isOpen, setIsOpen] = useState(data.isOpen);
   const [isAddMenuVisible, setIsAddMenuVisible] = useState(false);
   const [isOption, setIsOption] = useState(false);
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
@@ -72,12 +71,6 @@ const ShopMenuComponent = () => {
     fetchMenuData();
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchMenuData();
-    }, [])
-  );
-
   const fetchMenuData = async () => {
     try {
       const token = await AsyncStorage.getItem("authToken");
@@ -90,7 +83,6 @@ const ShopMenuComponent = () => {
       fetchShopData(token);
       setShopName(shopData.shopName);
       console.log("shopData.status", shopData.status);
-      setIsOpen(shopData.status);
     } catch (error) {
       console.error("Error fetching menu:", error);
     }
@@ -165,7 +157,6 @@ const ShopMenuComponent = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setIsOpen(status);
       setIsLoading(false);
     } catch (error) {
       console.error("Error updating shop status:", error);
@@ -314,12 +305,12 @@ const ShopMenuComponent = () => {
         <TouchableOpacity
           style={[
             styles.statusButton,
-            isOpen ? styles.openButton : styles.closedButton,
+            shopData.status ? styles.openButton : styles.closedButton,
           ]}
-          onPress={() => updateShopStatus(!isOpen)}
+          onPress={() => updateShopStatus(!shopData.status)}
         >
           <Text style={styles.buttonText}>
-            {isOpen ? "เปิดรับออเดอร์" : "ปิดรับออเดอร์"}
+            {shopData.status ? "เปิดรับออเดอร์" : "ปิดรับออเดอร์"}
           </Text>
         </TouchableOpacity>
       </View>

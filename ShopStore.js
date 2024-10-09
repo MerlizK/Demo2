@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { APIURL } from "./Constants";
 
 const useShopStore = create((set) => ({
-  shopData: null,
+  shopData: { status: false },
   loading: false,
   error: null,
   token: null,

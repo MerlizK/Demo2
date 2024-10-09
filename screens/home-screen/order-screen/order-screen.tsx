@@ -176,7 +176,6 @@ const OrderList = () => {
   const [orders, setOrders] = useState<OrderType[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const { shopData, fetchShopData } = useShopStore();
-  const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const handleRefresh = async () => {
@@ -196,7 +195,6 @@ const OrderList = () => {
 
       const retryFetchShopStatus = () => {
         if (shopData && shopData.status) {
-          setIsOpen(shopData.status);
         } else {
           setTimeout(() => {
             fetchMenuData();
@@ -225,7 +223,7 @@ const OrderList = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setIsOpen(status);
+
       setIsLoading(false);
     } catch (error) {
       console.error("Error updating shop status:", error);
@@ -240,14 +238,14 @@ const OrderList = () => {
         <TouchableOpacity
           style={[
             styles.statusButton,
-            isOpen ? styles.openButton : styles.closedButton,
+            shopData.status ? styles.openButton : styles.closedButton,
           ]}
           onPress={() => {
-            updateShopStatus(!isOpen);
+            updateShopStatus(!shopData.status);
           }}
         >
           <Text style={styles.buttonText}>
-            {isOpen ? "เปิดรับออเดอร์" : "ปิดรับออเดอร์"}
+            {shopData.status ? "เปิดรับออเดอร์" : "ปิดรับออเดอร์"}
           </Text>
         </TouchableOpacity>
       </View>

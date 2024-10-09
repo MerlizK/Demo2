@@ -4,11 +4,8 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import TabOrder from "./TabShopSelectOrder";
-import TabInfo from "./TabShopInfo";
-import TabTime from "./TabShopSettingTime";
 import MenuScreen from "./menu-screen/menu-screen";
 import useShopStore from "../../ShopStore";
 import ProfileScreen from "./profile-screen/profile-screen";
