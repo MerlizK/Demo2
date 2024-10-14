@@ -1,6 +1,6 @@
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   TextInput,
@@ -11,6 +11,7 @@ import {
   Image,
   Alert,
 } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import axios from "axios";
 import { APIURL } from "../Constants";
 import Entypo from "@expo/vector-icons/Entypo";
@@ -23,10 +24,23 @@ const RegisterScreen = () => {
   const [password, setPassword] = useState<string>("");
   const [shopName, setShopName] = useState<string>("");
   const [tel, setTel] = useState<string>("");
-  const [canteenId, setCanteenId] = useState<number>(0);
+  const [canteenId, setCanteenId] = useState<number | null>(null);
+  const [canteens, setCanteens] = useState<any[]>([]);
   const [shopNumber, setShopNumber] = useState<string>("");
 
   const navigation = useNavigation();
+
+  useEffect(() => {
+    const fetchCanteens = async () => {
+      try {
+        const response = await axios.get(`${APIURL}canteen`);
+        setCanteens(response.data);
+      } catch (error) {
+        Alert.alert("Error", "Failed to fetch canteens");
+      }
+    };
+    fetchCanteens();
+  }, []);
 
   const handleRegister = async () => {
     if (!username || !password || !shopName || !tel || !canteenId) {
@@ -48,13 +62,13 @@ const RegisterScreen = () => {
         tel,
         shopNumber,
       };
-      console.log("first", payload);
 
       const response = await axios.post(`${APIURL}shop/create-shop`, payload, {
         headers: {
           "Content-Type": "application/json",
         },
       });
+
       if (response.status === 201) {
         const { token } = response.data;
         await AsyncStorage.setItem("authToken", token);
@@ -158,13 +172,29 @@ const RegisterScreen = () => {
 
         <View style={styles.row}>
           <Text style={styles.label}>โรงอาหาร:</Text>
-          <TextInput
-            placeholder="Canteen ID"
-            style={styles.input}
-            value={canteenId.toString()}
-            keyboardType="numeric"
-            onChangeText={(text) => setCanteenId(Number(text))}
-          />
+          <View
+            style={{
+              flex: 1,
+              height: 50,
+              justifyContent: "center",
+              borderWidth: 1,
+              borderColor: "#ccc",
+              borderRadius: 5,
+            }}
+          >
+            <Picker
+              selectedValue={canteenId}
+              onValueChange={(itemValue) => setCanteenId(itemValue)}
+            >
+              {canteens.map((canteen) => (
+                <Picker.Item
+                  key={canteen.canteenId}
+                  label={canteen.name}
+                  value={canteen.canteenId}
+                />
+              ))}
+            </Picker>
+          </View>
         </View>
 
         <View style={styles.row}>

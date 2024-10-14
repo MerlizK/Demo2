@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ import axios from "axios";
 import { APIURL } from "../../../Constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { HeadersToken } from "../../../Utils";
+import { Picker } from "@react-native-picker/picker";
 
 type ProfileData = {
   username: string;
@@ -38,6 +39,9 @@ const ProfileScreen = () => {
     shopNumber: "",
     profileImage: "",
   });
+  const [canteens, setCanteens] = useState<
+    { canteenId: string; name: string }[]
+  >([]);
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const navigation = useNavigation();
 
@@ -56,7 +60,7 @@ const ProfileScreen = () => {
           password: shopData.password,
           shopName: shopData.shopName,
           phoneNumber: shopData.tel,
-          canteen: shopData.canteenId.toString(),
+          canteen: shopData.canteenId,
           shopNumber: shopData.shopNumber,
           profileImage: shopData.profilePicture,
         });
@@ -66,7 +70,18 @@ const ProfileScreen = () => {
       }
     };
 
+    const fetchCanteens = async () => {
+      try {
+        const response = await axios.get(`${APIURL}canteen`);
+        setCanteens(response.data);
+      } catch (error) {
+        console.error("Error fetching canteens:", error);
+        Alert.alert("Error", "Failed to fetch canteens");
+      }
+    };
+
     fetchShopInfo();
+    fetchCanteens();
   }, []);
 
   const handleInputChange = (field: keyof ProfileData, value: string) => {
@@ -76,32 +91,6 @@ const ProfileScreen = () => {
     });
   };
 
-  const handleNavigateToHistory = () => {
-    navigation.navigate("HistoryScreen");
-  };
-
-  const handleImagePick = async () => {
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (permissionResult.granted === false) {
-      Alert.alert("Error", "Permission to access camera roll is required!");
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
-      base64: true,
-    });
-
-    if (!result.canceled && result.assets?.[0]?.base64) {
-      setData((prevData) => ({
-        ...prevData,
-        profileImage: result.assets[0].base64 || "",
-      }));
-    }
-  };
-
   const handleSave = async () => {
     if (data.password !== confirmPassword) {
       Alert.alert("Error", "Passwords do not match");
@@ -109,7 +98,7 @@ const ProfileScreen = () => {
     }
 
     const payload = {
-      canteenId: parseInt(data.canteen),
+      canteenId: data.canteen,
       username: data.username,
       password: data.password,
       shopName: data.shopName,
@@ -137,6 +126,31 @@ const ProfileScreen = () => {
     }
   };
 
+  const handleNavigateToHistory = () => {
+    navigation.navigate("HistoryScreen" as never);
+  };
+
+  const handleImagePick = async () => {
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.granted === false) {
+      Alert.alert("Error", "Permission to access camera roll is required!");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 1,
+      base64: true,
+    });
+
+    if (!result.canceled && result.assets?.[0]?.base64) {
+      setData((prevData) => ({
+        ...prevData,
+        profileImage: result.assets[0].base64 || "",
+      }));
+    }
+  };
   return (
     <>
       <Header
@@ -225,17 +239,31 @@ const ProfileScreen = () => {
               />
             )}
           </View>
-
           <View style={styles.inputRow}>
             <Text style={styles.label}>โรงอาหาร:</Text>
             {!isEditing ? (
-              <Text style={styles.description}>{data.canteen}</Text>
+              <Text style={styles.description}>
+                {canteens.find((c) => c.canteenId === data.canteen)?.name ||
+                  "Unknown"}
+              </Text>
             ) : (
-              <TextInput
-                style={styles.input}
-                value={data.canteen}
-                onChangeText={(value) => handleInputChange("canteen", value)}
-              />
+              <View style={styles.picker}>
+                <Picker
+                  selectedValue={data.canteen}
+                  onValueChange={(itemValue) =>
+                    handleInputChange("canteen", itemValue)
+                  }
+                  style={styles.picker}
+                >
+                  {canteens.map((canteen) => (
+                    <Picker.Item
+                      key={canteen.canteenId}
+                      label={canteen.name}
+                      value={canteen.canteenId.toString()}
+                    />
+                  ))}
+                </Picker>
+              </View>
             )}
           </View>
 
@@ -341,6 +369,14 @@ const styles = StyleSheet.create({
   registerButtonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  picker: {
+    flex: 1,
+    height: 50,
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
   },
 });
 
